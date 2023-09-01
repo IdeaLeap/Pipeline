@@ -80,6 +80,7 @@ export class DynamicExecutor {
       executionError = error as Error;
       this.log(`Error occurred: ${String(executionError)}`);
       result = null;
+      throw executionError;
     }
 
     // Call the afterExecute hook if provided
@@ -87,5 +88,12 @@ export class DynamicExecutor {
 
     this.log(`Execution result: ${String(result)}`);
     return result;
+  }
+
+  static async run(params: { code: string; config?: ExecutorConfig }) {
+    const { code, config, ...rest } = params;
+    const executor = new DynamicExecutor(config);
+    const res = await executor.execute(code, ...Object.values(rest));
+    return res;
   }
 }

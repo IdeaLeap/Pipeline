@@ -3,6 +3,7 @@ import {
   Pipeline,
   SerializablePipelineOptions,
   PipeRegistry,
+  DynamicExecutor,
 } from "@idealeap/pipeline"; // 请替换成你的模块导入方式
 
 test("Pipe", async () => {
@@ -37,6 +38,59 @@ test("Pipe", async () => {
   await pipeline.execute(1).then((results) => {
     console.log("Final results:", results);
   });
+});
+
+test("并行执行——测测你的", async () => {
+  const pipe1 = new Pipe(
+    (input: string) => {
+      return input + "——————(被我测了";
+    },
+    {
+      id: "pipe1",
+      batch: true,
+      onBatchResult: (x: string[]) => {
+        return `*${x.join("\n")}*`;
+      },
+    },
+  );
+  const pipe2 = new Pipe(
+    async (input: string) => {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      return input + "\n\n你看看你测试了多少！！🤬😡";
+    },
+    {
+      id: "pipe2",
+    },
+  );
+  const pipe3 = new Pipe(
+    async (input: string) => {
+      const res = await DynamicExecutor.run({
+        code: `console.log(\`${input}\`);
+        return \`${input}\`;`,
+      });
+      console.log(res);
+      return input;
+    },
+    {
+      id: "pipe3",
+    },
+  );
+  const pipeline = new Pipeline([pipe1, pipe2, pipe3], {
+    onProgress: (completed, total) => {
+      console.log(`Progress: ${completed}/${total}`);
+    },
+  });
+
+  // 执行管道
+  const res = await pipeline.execute([
+    "我是甲，别测我┭┮﹏┭┮",
+    "我是乙，求你测我┭┮﹏┭┮",
+    "我是丙，来啊你以为我怕你！",
+    "我是丁，你敢？！滚一边去~",
+  ]);
+  expect([...res.values()].at(-1)).toEqual(
+    `*我是甲，别测我┭┮﹏┭┮——————(被我测了\n我是乙，求你测我┭┮﹏┭┮——————(被我测了\n我是丙，来啊你以为我怕你！——————(被我测了\n我是丁，你敢？！滚一边去~——————(被我测了*\n\n你看看你测试了多少！！🤬😡`,
+  );
 });
 
 test("Pipeline with JSON", async () => {

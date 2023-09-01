@@ -1,4 +1,4 @@
-import { DynamicExecutor, batchDecorator } from "@idealeap/gwt";
+import { DynamicExecutor, batchDecorator } from "@idealeap/pipeline";
 
 test("DynamicExecutor", async () => {
   // 使用示例
@@ -61,4 +61,13 @@ test("DynamicExecutor with batchDecorator", async () => {
   const res = await batchDecorator(fn)([1, 2, 3]);
   console.log(res);
   expect(res).toEqual([1, 1, 1]);
+});
+
+test("static run", async () => {
+  expect(
+    await DynamicExecutor.run({
+      code: `console.log("hello idealeap!")
+      return "hello idealeap!"`,
+    }),
+  ).toEqual("hello idealeap!");
 });

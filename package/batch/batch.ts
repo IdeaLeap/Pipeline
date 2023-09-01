@@ -1,3 +1,5 @@
+// 本代码由GPT4生成，具体可见https://pandora.idealeap.cn/share/26cf4f3d-9089-4dbc-87ef-63bc01ed5bb2
+
 export type Awaited<T> = T extends PromiseLike<infer U> ? U : T;
 // 批处理选项
 export interface BatchOptions<T, R> {

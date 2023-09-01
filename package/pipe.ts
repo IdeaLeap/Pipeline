@@ -1,5 +1,9 @@
 // 本代码由GPT4生成，具体可见https://pandora.idealeap.cn/share/33072598-a95f-4188-9003-76ccc5d964cb
-import { batchDecorator, BatchOptions, PipeRegistryType } from "@idealeap/pipeline";
+import {
+  batchDecorator,
+  BatchOptions,
+  PipeRegistryType,
+} from "@idealeap/pipeline";
 // 类型和接口定义
 export type MaybePromise<T> = T | Promise<T>;
 
@@ -322,7 +326,11 @@ export class Pipeline {
   }
 
   // 添加 Pipe 并返回 this，以支持链式调用
-  addPipe<T, R>(pipe: Pipe<T, R>): this {
+  addPipe<T, R>(pipe: Pipe<T, R> | Pipe<T, R>[]): this {
+    if (Array.isArray(pipe)) {
+      this.pipes = this.pipes.concat(pipe);
+      return this;
+    }
     this.pipes.push(pipe);
     return this;
   }
