@@ -1,6 +1,5 @@
 <div align="center">
-<img src="https://avatars.githubusercontent.com/u/129276618?s=200&v=4" style="width:100%;" alt="IdeaLeap Logo">
-<h1>Pipeline</h1></div>
+<img src="https://github.com/IdeaLeap/Pipline/assets/49270362/eae58b53-77e9-41f2-913a-baeccdf4b962" style="width:100%;" alt="IdeaLeap Logo">
 
 </p>
 <p align="center">A lightweight, low-code Pipeline built with GPT-4.</p>
