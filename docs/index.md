@@ -3,23 +3,23 @@
 layout: home
 
 hero:
-  name: "GWT"
-  text: "llm agents framwork based on gwt"
-  tagline: My great project tagline
+  name: "Pipeline"
+  text: "@idealeap/pipeline"
+  tagline: A Lightweight Low-code Pipeline code by GPT-4.
   actions:
     - theme: brand
-      text: Markdown Examples
-      link: /markdown-examples
+      text: Get Started
+      link: /pipeline
     - theme: alt
-      text: API Examples
-      link: /api-examples
+      text: Star✨
+      link: https://github.com/IdeaLeap/Pipline
 
 features:
-  - title: Feature A
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
-  - title: Feature B
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
-  - title: Feature C
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
+  - title: Headless Low-code
+    details: All you need to do is import a piece of JSON.
+  - title: Event-Driven
+    details: Monitor progress seamlessly, and handle errors easily.
+  - title: Batching & Dynamic JS Executor
+    details: Supports batch processing of tasks, and dynamic JS executor.
 ---
 

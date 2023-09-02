@@ -2,27 +2,28 @@ import { defineConfig } from 'vitepress'
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
-  title: 'GWT',
-  description: 'llm agents framwork based on gwt',
+  title: 'Pipeline',
+  description: 'A Lightweight Low-code Pipeline code by GPT-4.',
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: 'Home', link: '/' },
-      { text: 'Examples', link: '/markdown-examples' },
+      { text: 'Document', link: '/pipeline' },
     ],
 
     sidebar: [
       {
-        text: 'Examples',
+        text: 'Pipeline',
         items: [
-          { text: 'Markdown Examples', link: '/markdown-examples' },
-          { text: 'Runtime API Examples', link: '/api-examples' },
+          { text: 'pipeline', link: '/pipeline' },
+          { text: 'batch', link: '/batch' },
+          { text: 'executor', link: '/executor' },
         ],
       },
     ],
 
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/vuejs/vitepress' },
+      { icon: 'github', link: 'https://github.com/IdeaLeap/Pipline' },
     ],
   },
 })
