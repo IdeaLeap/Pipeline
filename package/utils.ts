@@ -35,6 +35,12 @@ export class PipeRegistry {
       return result;
     },
   };
+
+  static customFn: Record<
+    string,
+    (result: any, context: PipelineContext) => any
+  > = {};
+
   static init() {
     const pipeRegistry = new PipeRegistry();
     //遍历commonPreProcess进行pipeRegistry.register注册
@@ -43,6 +49,10 @@ export class PipeRegistry {
     });
     //遍历commonPostProcess进行pipeRegistry.register注册
     Object.entries(PipeRegistry.commonPostProcess).forEach(([type, fn]) => {
+      pipeRegistry.register(type, fn);
+    });
+    //遍历customFn进行pipeRegistry.register注册
+    Object.entries(PipeRegistry.customFn).forEach(([type, fn]) => {
       pipeRegistry.register(type, fn);
     });
     return pipeRegistry;
