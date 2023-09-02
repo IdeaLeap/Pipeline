@@ -6,7 +6,7 @@ import {
   DynamicExecutor,
 } from "@idealeap/pipeline"; // 请替换成你的模块导入方式
 
-test("Pipe", async () => {
+test("Pipeline", async () => {
   const pipe1 = new Pipe<number, number>(
     (input) => {
       return input + 1;
@@ -25,14 +25,11 @@ test("Pipe", async () => {
     },
   );
 
-  const pipeline = new Pipeline([pipe1], {
+  const pipeline = new Pipeline([pipe1, pipe2], {
     onProgress: (completed, total) => {
       console.log(`Progress: ${completed}/${total}`);
     },
   });
-
-  // 动态添加管道
-  pipeline.addPipe(pipe2);
 
   // 执行管道
   await pipeline.execute(1).then((results) => {
@@ -40,7 +37,7 @@ test("Pipe", async () => {
   });
 });
 
-test("并行执行——测测你的", async () => {
+test("Pipeline with 并行&串行&动态代码", async () => {
   const pipe1 = new Pipe(
     (input: string) => {
       return input + "——————(被我测了";
@@ -94,8 +91,6 @@ test("并行执行——测测你的", async () => {
 });
 
 test("Pipeline with 链式调用", async () => {
-  // 示例代码
-  // 示例
   const pipeline = Pipeline.create()
     .addPipe(
       Pipe.create((input: number) => input + 1, {
@@ -138,7 +133,7 @@ test("Pipeline with JSON", async () => {
   await pipeline.execute("我饿").then(console.log);
 });
 
-test("pipeRegistry", async () => {
+test("Pipeline with pipeRegistry", async () => {
   const pipeRegistry = PipeRegistry.init();
   // 注册预定义的 Pipe 类型
   pipeRegistry.register("FetchData", async () => {
@@ -154,6 +149,12 @@ test("pipeRegistry", async () => {
     return "transformed data";
   });
 
+  pipeRegistry.register("postProcess", (input: string) => {
+    // 这里只是简单地返回一个字符串，实际情况可能涉及到更复杂的数据转换
+    // console.log(input, context);
+    return input + "\nBy the way, I'm postProcess";
+  });
+
   const pipelineJson = {
     pipes: [
       {
@@ -163,16 +164,27 @@ test("pipeRegistry", async () => {
       {
         id: "TransformData",
         type: "TransformData",
+        postProcessType: "postProcess",
       },
     ],
   };
 
   const pipeline = Pipeline.fromJSON(pipelineJson, {}, pipeRegistry);
-  await pipeline.execute(undefined).then((result) => {
-    console.log("Final result:", result);
-  });
 
   // 序列化为 JSON
   const jsonConfig = JSON.stringify(pipeline.toJSON());
   console.log("Serialized config:", jsonConfig);
+
+  // 导入 JSON
+  const newPipeline = Pipeline.fromJSON(
+    JSON.parse(jsonConfig),
+    {},
+    pipeRegistry,
+  );
+
+  // 执行
+  await newPipeline.execute().then(console.log);
+  expect(jsonConfig).toEqual(
+    `{"pipes":[{"id":"FetchData","type":"FetchData"},{"id":"TransformData","type":"TransformData","postProcessType":"postProcess"}]}`,
+  );
 });

@@ -30,9 +30,13 @@ export interface PipeOptions<T, R> extends BatchOptions<T, R> {
   retries?: number;
   timeout?: number;
   preProcess?: (input: T, context: PipelineContext) => MaybePromise<T>;
+  preProcessType?: string;
   postProcess?: (result: R, context: PipelineContext) => MaybePromise<R>;
+  postProcessType?: string;
   errProcess?: (error: any, context: PipelineContext) => MaybePromise<boolean>;
+  errProcessType?: string;
   destroyProcess?: () => void;
+  destroyProcessType?: string;
   batch?: boolean;
   type?: string;
   params?: Record<string, any>;
@@ -176,6 +180,26 @@ export class Pipe<T, R> {
     callback: (input: T, context: PipelineContext) => MaybePromise<R>,
     predefinedTypes?: PipeRegistryType,
   ): Pipe<T, R> {
+    if (json.preProcessType) {
+      (json as PipeOptions<T, R>).preProcess = predefinedTypes?.get(
+        json.preProcessType,
+      );
+    }
+    if (json.postProcessType) {
+      (json as PipeOptions<T, R>).postProcess = predefinedTypes?.get(
+        json.postProcessType,
+      );
+    }
+    if (json.errProcessType) {
+      (json as PipeOptions<T, R>).errProcess = predefinedTypes?.get(
+        json.errProcessType,
+      );
+    }
+    if (json.destroyProcessType) {
+      (json as PipeOptions<T, R>).destroyProcess = predefinedTypes?.get(
+        json.destroyProcessType,
+      ) as () => void;
+    }
     if (json.type && predefinedTypes) {
       const predefinedCallback = predefinedTypes.get(json.type);
       if (predefinedCallback) {
@@ -265,7 +289,7 @@ export class Pipeline {
     return this;
   }
 
-  async execute(input: any): Promise<Map<string, any> | Map<string, any>[]> {
+  async execute(input?: any): Promise<Map<string, any> | Map<string, any>[]> {
     this.verifyDependencies(); // 在执行前验证依赖关系
     const emitter = this.options.emitter || new EventEmitter();
     const abortController = new AbortController();
@@ -356,6 +380,12 @@ export class Pipeline {
         retries: pipe.options.retries,
         timeout: pipe.options.timeout,
         batch: pipe.options.batch,
+        type: pipe.options.type,
+        params: pipe.options.params,
+        preProcessType: pipe.options.preProcessType,
+        postProcessType: pipe.options.postProcessType,
+        errProcessType: pipe.options.errProcessType,
+        destroyProcessType: pipe.options.destroyProcessType,
       })),
     };
   }
