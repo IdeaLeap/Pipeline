@@ -35,10 +35,12 @@ export interface PipeOptions<T, R> extends BatchOptions<T, R> {
   destroyProcess?: () => void;
   batch?: boolean;
   type?: string;
+  params?: Record<string, any>;
 }
 
 export interface PipelineContext {
   stepResults: Map<string, any>;
+  stepParams?: Map<string, any>;
   emitter: EventEmitter;
   abortController: AbortController;
 }
@@ -100,6 +102,8 @@ export class Pipe<T, R> {
   }
 
   async execute(input: T | T[], context: PipelineContext): Promise<R | R[]> {
+    !!this.options.params &&
+      context.stepParams?.set(this.options.id, this.options.params);
     if (this.options.batch) {
       const batchedFunction = batchDecorator(
         (input: T) => this.handleExecution(input, context),
@@ -272,6 +276,7 @@ export class Pipeline {
     };
 
     let lastOutput: any = input;
+    context.stepResults.set("index_input", lastOutput);
 
     try {
       for (let i = 0; i < this.pipes.length; i++) {
