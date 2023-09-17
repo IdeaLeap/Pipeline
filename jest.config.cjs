@@ -2,7 +2,7 @@
 module.exports = {
   preset: "ts-jest/presets/default-esm",
   testEnvironment: "node",
-  modulePathIgnorePatterns: ["dist/", "docs/"],
+  modulePathIgnorePatterns: ["<rootDir>/dist/", "<rootDir>/docs/"],
   moduleNameMapper: {
     "^(\\.{1,2}/.*)\\.js$": "$1",
   },
@@ -17,6 +17,5 @@ module.exports = {
   },
   transformIgnorePatterns: ["/node_modules/"],
   setupFiles: ["dotenv/config"],
-  modulePathIgnorePatterns: ["<rootDir>/dist/"],
   testTimeout: 20_000,
 };

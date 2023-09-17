@@ -21,4 +21,3 @@ npm exec prettier -- --loglevel=warn --write .
 # import the output ESM
 (cd dist && node -e 'require("@idealeap/pipeline")')
 (cd dist && node -e 'import("@idealeap/pipeline")' --input-type=module)
-(cd dist && npm publish --access public)
