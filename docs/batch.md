@@ -25,8 +25,7 @@ const batchedDouble = batchDecorator(doubled, {
 });
 
 const result = await batchedDouble([1, 2, 3, 4, 5]);
-console.log(result); 
-
+console.log(result);
 ```
 
 ## Type Definitions
@@ -110,9 +109,9 @@ const batchedFunctions = batchDecorator([asyncMultiplyByTwo, asyncAddThree], {
   },
 });
 
-await (async () => {
+await(async () => {
   const results = await batchedFunctions([1, 2, 3]);
-  console.log("Final Results:", results);//[40, 60, 80, 50, 60, 70]
+  console.log("Final Results:", results); //[40, 60, 80, 50, 60, 70]
 })();
 ```
 
@@ -127,5 +126,5 @@ const res = await batchDecorator(fn, {
     return `*${JSON.stringify(x)}*`;
   },
 })(["a", "b", "c"]);
-console.log(res);//*["_-a-_","_-b-_","_-c-_"]*
+console.log(res); //*["_-a-_","_-b-_","_-c-_"]*
 ```

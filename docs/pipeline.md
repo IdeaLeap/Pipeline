@@ -41,9 +41,12 @@ As this is a code-based framework, include it in your project by copying the sou
 ### Creating a Pipe
 
 ```ts
-const myPipe = new Pipe(async (input: number, context: PipelineContext) => {
-  return input * 2;
-}, {id: 'double'});
+const myPipe = new Pipe(
+  async (input: number, context: PipelineContext) => {
+    return input * 2;
+  },
+  { id: "double" },
+);
 ```
 
 ### Creating a Pipeline
@@ -71,7 +74,7 @@ myPipe.enableBatching();
 ### Dependencies
 
 ```ts
-myPipe.setDependencies(['anotherPipe']);
+myPipe.setDependencies(["anotherPipe"]);
 ```
 
 ### Retries

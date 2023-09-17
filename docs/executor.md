@@ -18,7 +18,7 @@ import { DynamicExecutor } from "@idealeap/pipeline";
 
 const executor = new DynamicExecutor({ logging: true });
 
-const result = await executor.execute('return args[0] + args[1]', 1, 2);
+const result = await executor.execute("return args[0] + args[1]", 1, 2);
 console.log(result); // Output: 3
 ```
 
@@ -62,7 +62,7 @@ Static method to run a code block with an optional configuration.
 
 ```ts
 const executor = new DynamicExecutor();
-const result = await executor.execute('return args[0] * 2', 5);
+const result = await executor.execute("return args[0] * 2", 5);
 console.log(result); // Output: 10
 ```
 
@@ -70,7 +70,7 @@ console.log(result); // Output: 10
 
 ```ts
 const executor = new DynamicExecutor({ timeout: 1000 });
-const result = await executor.execute('while(true);', 5);
+const result = await executor.execute("while(true);", 5);
 console.log(result); // Output: Error - Timeout
 ```
 
@@ -78,7 +78,7 @@ console.log(result); // Output: Error - Timeout
 
 ```ts
 const executor = new DynamicExecutor({ logging: true });
-const result = await executor.execute('return args[0] + args[1]', 1, 2);
+const result = await executor.execute("return args[0] + args[1]", 1, 2);
 ```
 
 ### Using Before and After Hooks
@@ -98,7 +98,7 @@ const config: ExecutorConfig = {
 };
 
 const executor = new DynamicExecutor(config);
-const result = await executor.execute('return args[0] + args[1]', 1, 2);
+const result = await executor.execute("return args[0] + args[1]", 1, 2);
 ```
 
 ### With Environment Variables
@@ -111,7 +111,7 @@ const executor = new DynamicExecutor({
   allowedBuiltins: ["fetch"],
 });
 
-await (async () => {
+await(async () => {
   const result = await executor.execute<number | string | null>(
     `
   if (fetch) {

@@ -31,7 +31,6 @@ const pipe2 = new Pipe((input, context) => input + 1, { id: "pipe2" });
 
 const pipeline = new Pipeline([pipe1, pipe2]);
 pipeline.execute(2).then((result) => console.log(result));
-
 ```
 
 ### Event-Driven
@@ -167,7 +166,7 @@ await pipeline.execute("我饿").then(console.log);
 ```
 
 ### Low Code
-  
+
 ```typescript
 const pipeRegistry = PipeRegistry.init();
 // 注册预定义的 Pipe 类型
@@ -211,11 +210,7 @@ const jsonConfig = JSON.stringify(pipeline.toJSON());
 console.log("Serialized config:", jsonConfig);
 
 // 导入 JSON
-const newPipeline = Pipeline.fromJSON(
-  JSON.parse(jsonConfig),
-  {},
-  pipeRegistry,
-);
+const newPipeline = Pipeline.fromJSON(JSON.parse(jsonConfig), {}, pipeRegistry);
 
 // 执行
 await newPipeline.execute().then(console.log);
