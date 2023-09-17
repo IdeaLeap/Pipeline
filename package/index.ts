@@ -1,4 +1,4 @@
-export * from "./batch";
-export * from "./executor";
+export * from "./batch/index";
+export * from "./executor/index";
 export * from "./pipe";
 export * from "./utils";
