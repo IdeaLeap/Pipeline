@@ -1,9 +1,6 @@
 // 本代码由GPT4生成，具体可见https://pandora.idealeap.cn/share/33072598-a95f-4188-9003-76ccc5d964cb
-import {
-  batchDecorator,
-  BatchOptions,
-  PipeRegistryType,
-} from "@idealeap/pipeline";
+import { batchDecorator, BatchOptions } from "@idealeap/pipeline/batch/index";
+import { PipeRegistryType } from "@idealeap/pipeline/utils";
 // 类型和接口定义
 export type MaybePromise<T> = T | Promise<T>;
 
@@ -12,10 +9,13 @@ export class EventEmitter {
   private events: Record<string, ((...args: any[]) => void)[]> = {};
 
   on(event: string, listener: (...args: any[]) => void) {
+    if (!this.events) {
+      this.events = {};
+    }
     if (!this.events[event]) {
       this.events[event] = [];
     }
-    this.events[event].push(listener);
+    this.events[event]?.push(listener);
   }
 
   emit(event: string, ...args: any[]) {
@@ -180,20 +180,35 @@ export class Pipe<T, R> {
     callback: (input: T, context: PipelineContext) => MaybePromise<R>,
     predefinedTypes?: PipeRegistryType,
   ): Pipe<T, R> {
-    if (json.preProcessType) {
-      (json as PipeOptions<T, R>).preProcess = predefinedTypes?.get(
+    if (
+      json.preProcessType &&
+      !!predefinedTypes &&
+      !!predefinedTypes.get(json.preProcessType)
+    ) {
+      (json as PipeOptions<T, R>).preProcess = predefinedTypes.get(
         json.preProcessType,
-      );
+      ) as unknown as (input: T, context: PipelineContext) => MaybePromise<T>;
     }
-    if (json.postProcessType) {
+    if (
+      json.postProcessType &&
+      !!predefinedTypes &&
+      !!predefinedTypes.get(json.postProcessType)
+    ) {
       (json as PipeOptions<T, R>).postProcess = predefinedTypes?.get(
         json.postProcessType,
-      );
+      ) as unknown as (input: R, context: PipelineContext) => MaybePromise<R>;
     }
-    if (json.errProcessType) {
+    if (
+      json.errProcessType &&
+      !!predefinedTypes &&
+      !!predefinedTypes.get(json.errProcessType)
+    ) {
       (json as PipeOptions<T, R>).errProcess = predefinedTypes?.get(
         json.errProcessType,
-      );
+      ) as unknown as (
+        error: any,
+        context: PipelineContext,
+      ) => MaybePromise<boolean>;
     }
     if (json.destroyProcessType) {
       (json as PipeOptions<T, R>).destroyProcess = predefinedTypes?.get(
@@ -201,7 +216,10 @@ export class Pipe<T, R> {
       ) as () => void;
     }
     if (json.type && predefinedTypes) {
-      const predefinedCallback = predefinedTypes.get(json.type);
+      const predefinedCallback = predefinedTypes.get(json.type) as unknown as (
+        input: T,
+        context: PipelineContext,
+      ) => any;
       if (predefinedCallback) {
         return new Pipe(predefinedCallback, json as PipeOptions<T, R>);
       }
@@ -305,8 +323,10 @@ export class Pipeline {
     try {
       for (let i = 0; i < this.pipes.length; i++) {
         const pipe = this.pipes[i];
-
-        if (!pipe.shouldExecute(context)) {
+        if (!pipe) {
+          continue;
+        }
+        if (!!pipe && !pipe.shouldExecute(context)) {
           continue;
         }
 
@@ -343,7 +363,11 @@ export class Pipeline {
       if (!fn) {
         throw new Error(`Function not found for id: ${pipeJson.id}`);
       }
-      return Pipe.fromJSON(pipeJson, fn, predefinedTypes);
+      return Pipe.fromJSON(
+        pipeJson,
+        fn as (input: any, context: PipelineContext) => any,
+        predefinedTypes,
+      );
     });
 
     return new Pipeline(pipes, json);
@@ -386,7 +410,7 @@ export class Pipeline {
         postProcessType: pipe.options.postProcessType,
         errProcessType: pipe.options.errProcessType,
         destroyProcessType: pipe.options.destroyProcessType,
-      })),
+      })) as SerializablePipeOptions[],
     };
   }
 }

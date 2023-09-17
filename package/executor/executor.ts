@@ -1,5 +1,4 @@
 // 本代码由GPT4生成，具体可见https://pandora.idealeap.cn/share/07ee53fc-e074-46f6-b808-b4f159bb3468
-
 export interface ExecutorConfig {
   timeout?: number;
   logging?: boolean;
@@ -44,12 +43,12 @@ export class DynamicExecutor {
 
     try {
       const sandbox: Record<string, any> = {
-        fetch: this.config.allowedBuiltins?.includes("fetch")
-          ? fetch
-          : undefined,
+        // fetch: this.config.allowedBuiltins?.includes("fetch")
+        //   ? fetch
+        //   : undefined,
         ...this.config.environment,
       };
-      sandbox.args = args;
+      sandbox["args"] = args;
 
       const envKeys = Object.keys(sandbox).join(",");
       const envValues = Object.values(sandbox);

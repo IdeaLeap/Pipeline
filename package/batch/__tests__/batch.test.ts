@@ -1,4 +1,4 @@
-import { batchDecorator } from "@idealeap/pipeline";
+import { batchDecorator } from "@idealeap/pipeline/batch";
 test("batchDecorator", async () => {
   // 使用示例
 

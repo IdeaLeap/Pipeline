@@ -1,4 +1,4 @@
-import { MaybePromise, PipelineContext } from "@idealeap/pipeline";
+import { MaybePromise, PipelineContext } from "@idealeap/pipeline/pipe";
 
 export type PipeRegistryType = PipeRegistry;
 
