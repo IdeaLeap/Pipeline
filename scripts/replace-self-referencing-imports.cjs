@@ -7,7 +7,6 @@ const distSrcDir = path.join(distDir, "package").replace(/\\/g, "/");
 function replaceSelfReferencingImports({ orig, file, config }) {
   if (!file.replace(/\\/g, "/").startsWith(distDir)) return orig;
   return orig.replace(/['"]([^"'\r\n]+)['"]/, (match, importPath) => {
-    console.log(`Checking ${importPath}`,importPath.startsWith("@idealeap/pipeline"),file.replace(/\\/g, "/").startsWith(distSrcDir));
     if (!importPath.startsWith("@idealeap/pipeline")) return match;
     if (!file.replace(/\\/g, "/").startsWith(distSrcDir)) return match;
     let relativePath = path.relative(
