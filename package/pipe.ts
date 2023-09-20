@@ -106,12 +106,15 @@ export class Pipe<T, R> {
   }
 
   async execute(input: T | T[], context: PipelineContext): Promise<R | R[]> {
-    if(this.options.id === "self_params" || this.options.id === "index_input"){
+    if (
+      this.options.id === "self_params" ||
+      this.options.id === "index_input"
+    ) {
       throw new Error("禁止设置id为self_params或index_input");
     }
     !!this.options.params &&
       context.stepParams?.set(this.options.id, this.options.params);
-    context.stepParams?.set("self_params",this.options.params || "")
+    context.stepParams?.set("self_params", this.options.params || "");
     if (this.options.batch) {
       const batchedFunction = batchDecorator(
         (input: T) => this.handleExecution(input, context),
@@ -324,7 +327,7 @@ export class Pipeline {
 
     let lastOutput: any = input;
     context.stepResults.set("index_input", lastOutput);
-    context.stepParams?.set("self_params","");
+    context.stepParams?.set("self_params", "");
 
     try {
       for (let i = 0; i < this.pipes.length; i++) {
@@ -337,7 +340,7 @@ export class Pipeline {
         }
 
         lastOutput = await pipe.execute(lastOutput, context);
-        emitter.emit("stepComplete", i + 1, this.pipes.length, lastOutput);//可能会被onProgress取代
+        emitter.emit("stepComplete", i + 1, this.pipes.length, lastOutput); //可能会被onProgress取代
         this.options.onProgress?.(i + 1, this.pipes.length);
       }
     } finally {

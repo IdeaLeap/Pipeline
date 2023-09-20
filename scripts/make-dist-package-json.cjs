@@ -16,31 +16,30 @@ for (const key of ["types", "main", "module"]) {
 pkgJson["main"] = "dist/index.js";
 pkgJson["types"] = "dist/index.d.ts";
 pkgJson["type"] = "commonjs";
-pkgJson["exports"]= {
+(pkgJson["exports"] = {
   ".": {
-    "require": {
-      "types": "./index.d.ts",
-      "default": "./index.js"
+    require: {
+      types: "./index.d.ts",
+      default: "./index.js",
     },
-    "types": "./index.d.mts",
-    "default": "./index.mjs"
+    types: "./index.d.mts",
+    default: "./index.mjs",
   },
   "./*.mjs": {
-    "types": "./*.d.ts",
-    "default": "./*.mjs"
+    types: "./*.d.ts",
+    default: "./*.mjs",
   },
   "./*.js": {
-    "types": "./*.d.ts",
-    "default": "./*.js"
+    types: "./*.d.ts",
+    default: "./*.js",
   },
   "./*": {
-    "types": "./*.d.ts",
-    "require": "./*.js",
-    "default": "./*.mjs"
-  }
-},
-
-delete pkgJson.devDependencies;
+    types: "./*.d.ts",
+    require: "./*.js",
+    default: "./*.mjs",
+  },
+}),
+  delete pkgJson.devDependencies;
 delete pkgJson.scripts["docs:build"];
 delete pkgJson.scripts["docs:dev"];
 delete pkgJson.scripts["docs:preview"];

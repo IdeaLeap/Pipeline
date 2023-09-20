@@ -7,7 +7,7 @@ import {
   EventEmitter,
   PipeOptions,
   PipelineOptions,
-  PipelineContext
+  PipelineContext,
 } from "@idealeap/pipeline"; // 请替换成你的模块导入方式
 
 test("Pipeline", async () => {
@@ -236,7 +236,7 @@ test("Pipe的Emitter和依赖", async () => {
   async function run() {
     try {
       const _ = new Pipeline([pipe1, pipe2], chainPipeOptions);
-      const result =await _.execute(2)
+      const result = await _.execute(2);
       console.log("Final result:", result);
     } catch (error) {
       console.log("Error:", error);
@@ -247,18 +247,18 @@ test("Pipe的Emitter和依赖", async () => {
 });
 
 test("Pipe获取初始输入和当前参数", async () => {
-
   const pipeRegistry = PipeRegistry.init();
-  pipeRegistry.register("step1", async (input: any, context: PipelineContext) => {
-    console.log(input,context.stepParams?.get("self_params"))
-    return new Promise((resolve) =>
-      setTimeout(() => resolve(input), 1000),
-    );
-  });
+  pipeRegistry.register(
+    "step1",
+    async (input: any, context: PipelineContext) => {
+      console.log(input, context.stepParams?.get("self_params"));
+      return new Promise((resolve) => setTimeout(() => resolve(input), 1000));
+    },
+  );
 
   pipeRegistry.register("step2", (input: any, context: PipelineContext) => {
     input = input + 1;
-    console.log(input,context.stepParams?.get("self_params"))
+    console.log(input, context.stepParams?.get("self_params"));
     return context.stepResults.get("index_input");
   });
 
@@ -267,12 +267,12 @@ test("Pipe获取初始输入和当前参数", async () => {
       {
         id: "FetchData",
         type: "step1",
-        params:{test:"test!!"}
+        params: { test: "test!!" },
       },
       {
         id: "TransformData",
         type: "step2",
-        params:{test:"test22!!"}
+        params: { test: "test22!!" },
       },
     ],
   };
