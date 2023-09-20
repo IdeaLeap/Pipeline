@@ -2,12 +2,11 @@
   "name": "@idealeap/pipeline",
   "version": "1.1.1",
   "description": "A lightweight, low-code Pipeline built with GPT-4.",
-  "types": "dist/index.d.ts",
-  "main": "dist/index.js",
+  "main": "package/index.js",
   "author": "GPT-4 && Marlene && IdeaLeap",
   "repository": "github:idealeap/Pipeline",
   "license": "MIT",
-  "type": "commonjs",
+  "type": "module",
   "private": false,
   "keywords": [
     "Typescript",
@@ -17,29 +16,6 @@
   ],
   "engines": {
     "node": ">=18"
-  },
-  "exports": {
-    ".": {
-      "require": {
-        "types": "./index.d.ts",
-        "default": "./index.js"
-      },
-      "types": "./index.d.mts",
-      "default": "./index.mjs"
-    },
-    "./*.mjs": {
-      "types": "./*.d.ts",
-      "default": "./*.mjs"
-    },
-    "./*.js": {
-      "types": "./*.d.ts",
-      "default": "./*.js"
-    },
-    "./*": {
-      "types": "./*.d.ts",
-      "require": "./*.js",
-      "default": "./*.mjs"
-    }
   },
   "scripts": {
     "start": "ts-node --esm ./package/index.ts",
