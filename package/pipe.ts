@@ -313,6 +313,7 @@ export class Pipeline {
     const abortController = new AbortController();
     const context: PipelineContext = {
       stepResults: new Map(),
+      stepParams: new Map(),
       emitter,
       abortController,
     };
@@ -331,7 +332,7 @@ export class Pipeline {
         }
 
         lastOutput = await pipe.execute(lastOutput, context);
-        emitter.emit("stepComplete", i + 1, this.pipes.length, lastOutput);
+        emitter.emit("stepComplete", i + 1, this.pipes.length, lastOutput);//可能会被onProgress取代
         this.options.onProgress?.(i + 1, this.pipes.length);
       }
     } finally {
