@@ -108,6 +108,7 @@ export class Pipe<T, R> {
   async execute(input: T | T[], context: PipelineContext): Promise<R | R[]> {
     !!this.options.params &&
       context.stepParams?.set(this.options.id, this.options.params);
+    context.stepParams?.set("self_params",this.options.params || "")
     if (this.options.batch) {
       const batchedFunction = batchDecorator(
         (input: T) => this.handleExecution(input, context),
@@ -320,6 +321,7 @@ export class Pipeline {
 
     let lastOutput: any = input;
     context.stepResults.set("index_input", lastOutput);
+    context.stepParams?.set("self_params","");
 
     try {
       for (let i = 0; i < this.pipes.length; i++) {

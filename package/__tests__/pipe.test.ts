@@ -6,7 +6,8 @@ import {
   DynamicExecutor,
   EventEmitter,
   PipeOptions,
-  PipelineOptions
+  PipelineOptions,
+  PipelineContext
 } from "@idealeap/pipeline"; // 请替换成你的模块导入方式
 
 test("Pipeline", async () => {
@@ -243,4 +244,40 @@ test("Pipe的Emitter和依赖", async () => {
   }
 
   await run();
+});
+
+test("Pipe获取初始输入和当前参数", async () => {
+
+  const pipeRegistry = PipeRegistry.init();
+  pipeRegistry.register("step1", async (input: any, context: PipelineContext) => {
+    console.log(input,context.stepParams?.get("self_params"))
+    return new Promise((resolve) =>
+      setTimeout(() => resolve(input), 1000),
+    );
+  });
+
+  pipeRegistry.register("step2", (input: any, context: PipelineContext) => {
+    input = input + 1;
+    console.log(input,context.stepParams?.get("self_params"))
+    return context.stepResults.get("index_input");
+  });
+
+  const pipelineJson = {
+    pipes: [
+      {
+        id: "FetchData",
+        type: "step1",
+        params:{test:"test!!"}
+      },
+      {
+        id: "TransformData",
+        type: "step2",
+        params:{test:"test22!!"}
+      },
+    ],
+  };
+
+  const pipeline = Pipeline.fromJSON(pipelineJson, {}, pipeRegistry);
+
+  await pipeline.execute("我是输入").then(console.log);
 });
