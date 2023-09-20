@@ -106,6 +106,9 @@ export class Pipe<T, R> {
   }
 
   async execute(input: T | T[], context: PipelineContext): Promise<R | R[]> {
+    if(this.options.id === "self_params" || this.options.id === "index_input"){
+      throw new Error("禁止设置id为self_params或index_input");
+    }
     !!this.options.params &&
       context.stepParams?.set(this.options.id, this.options.params);
     context.stepParams?.set("self_params",this.options.params || "")
