@@ -280,3 +280,31 @@ test("Pipe获取初始输入和当前参数", async () => {
 
   await pipeline.execute("我是输入").then(console.log);
 });
+
+
+test("Pipe使用globalParams", async () => {
+  const pipeRegistry = PipeRegistry.init();
+  pipeRegistry.register(
+    "step1",
+    async (input: any, context: PipelineContext) => {
+      console.log(input, context.stepParams["self_params"]);
+      return new Promise((resolve) => setTimeout(() => resolve(input), 1000));
+    },
+  );
+  const pipelineJson = {
+    pipes: [
+      {
+        id: "FetchData",
+        type: "step1",
+        params: { test: "test!!" },
+      },
+    ],
+    globalParams:{
+      abc:"123"
+    }
+  };
+
+  const pipeline = Pipeline.fromJSON(pipelineJson, {}, pipeRegistry);
+
+  await pipeline.execute("我是输入").then(console.log);
+});

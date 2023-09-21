@@ -50,15 +50,13 @@ export interface PipelineOptions {
   emitter?: EventEmitter;
   destroyProcess?: () => void;
   errProcess?: (error: any, context: PipelineContext) => MaybePromise<boolean>;
+  globalParams?:Record<string,any>;
 }
 
-export type SerializablePipeOptions = Omit<
-  PipeOptions<any, any>,
-  "preProcess" | "postProcess" | "errProcess"
->;
+export type SerializablePipeOptions = PipeOptions<any, any>;
 
 export interface SerializablePipelineOptions
-  extends Omit<PipelineOptions, "emitter" | "errProcess" | "onProgress"> {
+  extends PipelineOptions {
   pipes: SerializablePipeOptions[];
 }
 
@@ -74,6 +72,16 @@ function replaceSlots(obj: any, replacements: SlotReplacements): any {
       });
     }
   });
+}
+
+function mergeJSONSafely(obj1: object, obj2: object): object {
+  lodash.mergeWith(obj1, obj2, (objValue, srcValue, key, object, source) => {
+    if (lodash.has(obj1, key) && lodash.has(obj2, key)) {
+      throw new Error(`Pipe Params ${key} 与 globalParams 冲突`);
+    }
+    return undefined; // 返回undefined以使用默认的合并行为
+  });
+  return obj1;
 }
 
 const maybeAwait = async <T>(input: MaybePromise<T>) =>
@@ -320,7 +328,7 @@ export class Pipeline {
 
   async execute(
     input?: any
-  ): Promise<Record<string, any> | Map<string, any>[]> {
+  ): Promise<Record<string, any> | Record<string, any>[]> {
     const emitter = this.options.emitter || new EventEmitter();
     const abortController = new AbortController();
     const context: PipelineContext = {
@@ -343,6 +351,8 @@ export class Pipeline {
         if (!!pipe && !pipe.shouldExecute(context)) {
           continue;
         }
+
+        !!this.options.globalParams && lodash.set(pipe, ["options", "params"], mergeJSONSafely(this.options.globalParams, pipe.options.params || {}));
 
         lastOutput = await pipe.execute(lastOutput, context);
         emitter.emit("stepComplete", i + 1, this.pipes.length, lastOutput); //可能会被onProgress取代
@@ -427,7 +437,3 @@ export class Pipeline {
     };
   }
 }
-
-// 请进一步完善上述代码的功能，例如
-
-// 请给出完整的Ts代码和示例，没有变化的代码可以省略，但是不要函数中间省略。
