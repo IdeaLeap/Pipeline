@@ -271,7 +271,7 @@ test("Pipe获取初始输入和当前参数", async () => {
       {
         id: "TransformData",
         type: "step2",
-        params: { test: "test22!!{{FetchData}}" },//插槽！
+        params: { test: "test22!!{{FetchData}}" }, //插槽！
       },
     ],
   };
@@ -280,7 +280,6 @@ test("Pipe获取初始输入和当前参数", async () => {
 
   await pipeline.execute("我是输入").then(console.log);
 });
-
 
 test("Pipe使用globalParams", async () => {
   const pipeRegistry = PipeRegistry.init();
@@ -299,9 +298,9 @@ test("Pipe使用globalParams", async () => {
         params: { test: "test!!" },
       },
     ],
-    globalParams:{
-      abc:"123"
-    }
+    globalParams: {
+      abc: "123",
+    },
   };
 
   const pipeline = Pipeline.fromJSON(pipelineJson, {}, pipeRegistry);

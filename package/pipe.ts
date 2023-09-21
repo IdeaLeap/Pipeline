@@ -50,13 +50,12 @@ export interface PipelineOptions {
   emitter?: EventEmitter;
   destroyProcess?: () => void;
   errProcess?: (error: any, context: PipelineContext) => MaybePromise<boolean>;
-  globalParams?:Record<string,any>;
+  globalParams?: Record<string, any>;
 }
 
 export type SerializablePipeOptions = PipeOptions<any, any>;
 
-export interface SerializablePipelineOptions
-  extends PipelineOptions {
+export interface SerializablePipelineOptions extends PipelineOptions {
   pipes: SerializablePipeOptions[];
 }
 
@@ -90,7 +89,7 @@ const maybeAwait = async <T>(input: MaybePromise<T>) =>
 // 用于处理超时的函数
 const withTimeout = <T>(
   promise: MaybePromise<T>,
-  timeout: number
+  timeout: number,
 ): Promise<T> => {
   const timer = new Promise<T>((_, reject) => {
     setTimeout(() => reject(new Error("Timeout")), timeout);
@@ -102,12 +101,12 @@ const withTimeout = <T>(
 export class Pipe<T, R> {
   constructor(
     private callback: (input: T, context: PipelineContext) => MaybePromise<R>,
-    public options: PipeOptions<T, R>
+    public options: PipeOptions<T, R>,
   ) {}
 
   private async handlePreProcess(
     input: T,
-    context: PipelineContext
+    context: PipelineContext,
   ): Promise<T> {
     return this.options.preProcess
       ? await maybeAwait(this.options.preProcess(input, context))
@@ -116,7 +115,7 @@ export class Pipe<T, R> {
 
   private async handlePostProcess(
     result: R,
-    context: PipelineContext
+    context: PipelineContext,
   ): Promise<R> {
     return this.options.postProcess
       ? await maybeAwait(this.options.postProcess(result, context))
@@ -134,17 +133,17 @@ export class Pipe<T, R> {
     lodash.set(
       context,
       ["stepParams", this.options.id],
-      this.options.params || {}
+      this.options.params || {},
     );
     lodash.set(
       context,
       ["stepParams", "self_params"],
-      this.options.params || {}
+      this.options.params || {},
     );
     if (this.options.batch) {
       const batchedFunction = batchDecorator(
         (input: T) => this.handleExecution(input, context),
-        this.options
+        this.options,
       ) as (input: T | T[]) => Promise<R | R[]>;
       return await batchedFunction(input);
     } else {
@@ -158,7 +157,7 @@ export class Pipe<T, R> {
 
   private async handleExecution(
     input: T,
-    context: PipelineContext
+    context: PipelineContext,
   ): Promise<R> {
     let retries = this.options.retries || 0;
     while (true) {
@@ -174,13 +173,13 @@ export class Pipe<T, R> {
           ["stepParams", "self_params"],
           replaceSlots(
             lodash.get(context, ["stepParams", "self_params"]),
-            context.stepResults
-          )
+            context.stepResults,
+          ),
         );
 
         let promise = this.callback(
           await this.handlePreProcess(input, context),
-          context
+          context,
         );
         if (this.options.timeout) {
           promise = withTimeout(promise, this.options.timeout);
@@ -189,13 +188,13 @@ export class Pipe<T, R> {
         const result = await maybeAwait(promise);
         const postProcessedResult = await this.handlePostProcess(
           result,
-          context
+          context,
         );
 
         lodash.set(
           context,
           ["stepResults", this.options.id],
-          postProcessedResult
+          postProcessedResult,
         );
 
         return postProcessedResult;
@@ -203,7 +202,7 @@ export class Pipe<T, R> {
         retries--;
         if (this.options.errProcess) {
           const skip = await maybeAwait(
-            this.options.errProcess(error, context)
+            this.options.errProcess(error, context),
           );
           if (skip) return input as unknown as R;
         }
@@ -219,7 +218,7 @@ export class Pipe<T, R> {
   static fromJSON<T, R>(
     json: SerializablePipeOptions,
     callback: (input: T, context: PipelineContext) => MaybePromise<R>,
-    predefinedTypes?: PipeRegistryType
+    predefinedTypes?: PipeRegistryType,
   ): Pipe<T, R> {
     if (
       json.preProcessType &&
@@ -227,7 +226,7 @@ export class Pipe<T, R> {
       !!predefinedTypes.get(json.preProcessType)
     ) {
       (json as PipeOptions<T, R>).preProcess = predefinedTypes.get(
-        json.preProcessType
+        json.preProcessType,
       ) as unknown as (input: T, context: PipelineContext) => MaybePromise<T>;
     }
     if (
@@ -236,7 +235,7 @@ export class Pipe<T, R> {
       !!predefinedTypes.get(json.postProcessType)
     ) {
       (json as PipeOptions<T, R>).postProcess = predefinedTypes?.get(
-        json.postProcessType
+        json.postProcessType,
       ) as unknown as (input: R, context: PipelineContext) => MaybePromise<R>;
     }
     if (
@@ -245,21 +244,21 @@ export class Pipe<T, R> {
       !!predefinedTypes.get(json.errProcessType)
     ) {
       (json as PipeOptions<T, R>).errProcess = predefinedTypes?.get(
-        json.errProcessType
+        json.errProcessType,
       ) as unknown as (
         error: any,
-        context: PipelineContext
+        context: PipelineContext,
       ) => MaybePromise<boolean>;
     }
     if (json.destroyProcessType) {
       (json as PipeOptions<T, R>).destroyProcess = predefinedTypes?.get(
-        json.destroyProcessType
+        json.destroyProcessType,
       ) as () => void;
     }
     if (json.type && predefinedTypes) {
       const predefinedCallback = predefinedTypes.get(json.type) as unknown as (
         input: T,
-        context: PipelineContext
+        context: PipelineContext,
       ) => any;
       if (predefinedCallback) {
         return new Pipe(predefinedCallback, json as PipeOptions<T, R>);
@@ -276,7 +275,7 @@ export class Pipe<T, R> {
   // 新增一个 static 方法用于创建新实例，并支持链式调用
   static create<T, R>(
     callback: (input: T, context: PipelineContext) => MaybePromise<R>,
-    options?: Partial<PipeOptions<T, R>>
+    options?: Partial<PipeOptions<T, R>>,
   ): Pipe<T, R> {
     return new Pipe(callback, options as PipeOptions<T, R>);
   }
@@ -327,7 +326,7 @@ export class Pipeline {
   }
 
   async execute(
-    input?: any
+    input?: any,
   ): Promise<Record<string, any> | Record<string, any>[]> {
     const emitter = this.options.emitter || new EventEmitter();
     const abortController = new AbortController();
@@ -352,7 +351,15 @@ export class Pipeline {
           continue;
         }
 
-        !!this.options.globalParams && lodash.set(pipe, ["options", "params"], mergeJSONSafely(this.options.globalParams, pipe.options.params || {}));
+        !!this.options.globalParams &&
+          lodash.set(
+            pipe,
+            ["options", "params"],
+            mergeJSONSafely(
+              this.options.globalParams,
+              pipe.options.params || {},
+            ),
+          );
 
         lastOutput = await pipe.execute(lastOutput, context);
         emitter.emit("stepComplete", i + 1, this.pipes.length, lastOutput); //可能会被onProgress取代
@@ -372,7 +379,7 @@ export class Pipeline {
       string,
       (input: any, context: PipelineContext) => MaybePromise<any>
     >,
-    predefinedTypes?: PipeRegistryType
+    predefinedTypes?: PipeRegistryType,
   ): Pipeline {
     if (!Array.isArray(json.pipes)) {
       throw new Error("Invalid JSON configuration: 'pipes' must be an array");
@@ -390,7 +397,7 @@ export class Pipeline {
       return Pipe.fromJSON(
         pipeJson,
         fn as (input: any, context: PipelineContext) => any,
-        predefinedTypes
+        predefinedTypes,
       );
     });
 
