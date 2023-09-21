@@ -201,10 +201,9 @@ test("Pipe的Emitter和依赖", async () => {
 
   const pipe2Options: PipeOptions<number, string> = {
     id: "pipe2",
-    dependencies: ["pipe1"],
   };
   const pipe2 = new Pipe<number, string>((input, context) => {
-    const depResult = context.stepResults.get("pipe1");
+    const depResult = context.stepResults["pipe1"];
     return `${input + depResult}`;
   }, pipe2Options);
 
@@ -251,15 +250,15 @@ test("Pipe获取初始输入和当前参数", async () => {
   pipeRegistry.register(
     "step1",
     async (input: any, context: PipelineContext) => {
-      console.log(input, context.stepParams?.get("self_params"));
+      console.log(input, context.stepParams["self_params"]);
       return new Promise((resolve) => setTimeout(() => resolve(input), 1000));
     },
   );
 
   pipeRegistry.register("step2", (input: any, context: PipelineContext) => {
     input = input + 1;
-    console.log(input, context.stepParams?.get("self_params"));
-    return context.stepResults.get("index_input");
+    console.log(input, context.stepParams["self_params"]);
+    return context.stepResults["index_input"];
   });
 
   const pipelineJson = {
@@ -272,7 +271,7 @@ test("Pipe获取初始输入和当前参数", async () => {
       {
         id: "TransformData",
         type: "step2",
-        params: { test: "test22!!" },
+        params: { test: "test22!!{{FetchData}}" },//插槽！
       },
     ],
   };
