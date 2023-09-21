@@ -120,6 +120,7 @@ export class Pipe<T, R> {
       this.options.id === "self_params" ||
       this.options.id === "index_input"
     ) {
+      context.emitter.emit("err", "禁止设置id为self_params或index_input");
       throw new Error("禁止设置id为self_params或index_input");
     }
     lodash.set(
@@ -140,6 +141,7 @@ export class Pipe<T, R> {
       return await batchedFunction(input);
     } else {
       if (Array.isArray(input)) {
+        context.emitter.emit("err", "Batch mode is not enabled for this pipe.");
         throw new Error("Batch mode is not enabled for this pipe.");
       }
       return await this.handleExecution(input, context);
@@ -154,6 +156,7 @@ export class Pipe<T, R> {
     while (true) {
       try {
         if (context.abortController.signal.aborted) {
+          context.emitter.emit("err", "Operation cancelled");
           throw new Error("Operation cancelled");
         }
 
@@ -197,6 +200,7 @@ export class Pipe<T, R> {
           if (skip) return input as unknown as R;
         }
         if (retries < 0) {
+          context.emitter.emit("err", error);
           throw error;
         }
       }

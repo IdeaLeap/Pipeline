@@ -31,7 +31,6 @@
     "build": "bash ./build"
   },
   "dependencies": {
-    "@types/lodash": "^4.14.198",
     "dotenv": "^16.3.1",
     "lodash": "^4.17.21"
   },
@@ -41,6 +40,7 @@
     "@types/node": "^20.4.2",
     "@typescript-eslint/eslint-plugin": "^6.1.0",
     "@typescript-eslint/parser": "^6.1.0",
+    "@types/lodash": "^4.14.198",
     "eslint": "^8.45.0",
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-import": "^2.25.2",
