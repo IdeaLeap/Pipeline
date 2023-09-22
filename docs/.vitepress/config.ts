@@ -16,22 +16,23 @@ export default defineConfig({
     ],
 
     sidebar: {
-      "/guide":[{
-        text: "Pipeline",
-        items: [
-          { text: "pipeline", link: "/guide/pipeline" },
-          { text: "batch", link: "/guide/batch" },
-          { text: "executor", link: "/guide/executor" },
-        ],
-      }],
-  },
-  editLink: {
-    pattern:
-      "https://github.com/idealeap/pipeline/edit/main/docs/:path",
-    text: "Edit this page on GitHub",
-  },
+      "/guide": [
+        {
+          text: "Pipeline",
+          items: [
+            { text: "pipeline", link: "/guide/pipeline" },
+            { text: "batch", link: "/guide/batch" },
+            { text: "executor", link: "/guide/executor" },
+          ],
+        },
+      ],
+    },
+    editLink: {
+      pattern: "https://github.com/idealeap/pipeline/edit/main/docs/:path",
+      text: "Edit this page on GitHub",
+    },
 
-  lastUpdatedText: "Last Updated",
+    lastUpdatedText: "Last Updated",
 
     socialLinks: [
       { icon: "github", link: "https://github.com/IdeaLeap/Pipline" },

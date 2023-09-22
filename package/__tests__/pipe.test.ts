@@ -250,28 +250,45 @@ test("Pipe获取初始输入和当前参数", async () => {
   pipeRegistry.register(
     "step1",
     async (input: any, context: PipelineContext) => {
-      console.log(input, context.stepParams["self_params"]);
-      return new Promise((resolve) => setTimeout(() => resolve(input), 1000));
+      console.log("step1",input, context.stepParams["self_params"]);
+      return new Promise((resolve) => setTimeout(() => resolve(input+"🚺"), 1000));
     },
   );
 
   pipeRegistry.register("step2", (input: any, context: PipelineContext) => {
-    input = input + 1;
-    console.log(input, context.stepParams["self_params"]);
+    console.log("step2",input, context.stepParams["self_params"],context.stepResults["index_input"]);
     return context.stepResults["index_input"];
   });
+
+  pipeRegistry.register(
+    "step3",
+    async (input: any, context: PipelineContext) => {
+      console.log("step3",input, context.stepParams["self_params"]);
+      return new Promise((resolve) => setTimeout(() => resolve(input), 1000));
+    },
+  );
 
   const pipelineJson = {
     pipes: [
       {
-        id: "FetchData",
+        id: "step1_",
         type: "step1",
         params: { test: "test!!" },
       },
       {
-        id: "TransformData",
+        id: "step2_",
         type: "step2",
+        inputs:{
+          "FetchData":"step1_"
+        },
         params: { test: "test22!!{{FetchData}}" }, //插槽！
+      },
+      {
+        id: "step3_",
+        type: "step3",
+        inputs:{
+          "input":"step1_", //这里的input是step1_的结果
+        },
       },
     ],
   };

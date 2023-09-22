@@ -1,20 +1,55 @@
 // 本代码由GPT4生成，具体可见https://pandora.idealeap.cn/share/33072598-a95f-4188-9003-76ccc5d964cb
 import { batchDecorator, BatchOptions } from "@idealeap/pipeline/batch/index";
-import { PipeRegistryType } from "@idealeap/pipeline/utils";
+import { PipeRegistryType } from "@idealeap/pipeline/registry";
+import { replaceSlots,mergeJSONSafely,isRecordOfString } from "@idealeap/pipeline/utils";
 import lodash from "lodash";
-// 类型和接口定义
+
+/**
+ * Represents a value that can be either a direct value of type `T` or a Promise that resolves to type `T`.
+ * Useful for functions that might return a value synchronously or asynchronously.
+ * 
+ * @typeParam T - The underlying type of the value or Promise.
+ */
 export type MaybePromise<T> = T | Promise<T>;
 
-// 简单的 EventEmitter 实现
+/**
+ * A simple implementation of an event emitter.
+ * 
+ * The `EventEmitter` class provides methods to subscribe to events (`on`) and to trigger those events (`emit`).
+ */
 export class EventEmitter {
+    /**
+   * Holds a record of all events and their respective listeners.
+   * The key represents the event name, and the value is an array of listener functions for that event.
+   */
   private events: Record<string, ((...args: any[]) => void)[]> = {};
 
+  /**
+   * Subscribes a listener function to a specified event.
+   * 
+   * @param event - The name of the event to which the listener should be subscribed.
+   * @param listener - The callback function that will be invoked when the event is emitted.
+   * 
+   * @example
+   * const emitter = new EventEmitter();
+   * emitter.on('data', (data) => console.log(data));
+   */
   on(event: string, listener: (...args: any[]) => void) {
     this.events = lodash.defaults(this.events, {});
     lodash.set(this.events, [event], lodash.get(this.events, [event], []));
     this.events[event]?.push(listener);
   }
 
+  /**
+   * Emits a specified event with the provided arguments, invoking all subscribed listeners for that event.
+   * 
+   * @param event - The name of the event to emit.
+   * @param args - The arguments to pass to each listener function.
+   * 
+   * @example
+   * const emitter = new EventEmitter();
+   * emitter.emit('data', { message: 'Hello World' });
+   */
   emit(event: string, ...args: any[]) {
     lodash.forEach(this.events[event], (listener) => listener(...args));
   }
@@ -36,7 +71,7 @@ export interface PipeOptions<T, R> extends BatchOptions<T, R> {
   batch?: boolean;
   type?: string;
   params?: Record<string, any>;
-  input?: string;
+  inputs?: Record<string, any> | string;
 }
 
 export interface PipelineContext {
@@ -60,29 +95,6 @@ export interface SerializablePipelineOptions extends PipelineOptions {
   pipes: SerializablePipeOptions[];
 }
 
-interface SlotReplacements {
-  [key: string]: string;
-}
-
-function replaceSlots(obj: any, replacements: SlotReplacements): any {
-  return lodash.cloneDeepWith(obj, (value: any) => {
-    if (lodash.isString(value)) {
-      return value.replace(/{{\s*(.*?)\s*}}/g, (match, key) => {
-        return replacements[key.trim()] ?? match;
-      });
-    }
-  });
-}
-
-function mergeJSONSafely(obj1: object, obj2: object): object {
-  lodash.mergeWith(obj1, obj2, (objValue, srcValue, key, object, source) => {
-    if (lodash.has(obj1, key) && lodash.has(obj2, key)) {
-      throw new Error(`Pipe Params ${key} 与 globalParams 冲突`);
-    }
-    return undefined; // 返回undefined以使用默认的合并行为
-  });
-  return obj1;
-}
 
 const maybeAwait = async <T>(input: MaybePromise<T>) =>
   await Promise.resolve(input);
@@ -169,12 +181,12 @@ export class Pipe<T, R> {
         }
 
         // 处理依赖项
-        lodash.set(
+        !lodash.isString(this.options.inputs) && lodash.set(
           context,
           ["stepParams", "self_params"],
           replaceSlots(
             lodash.get(context, ["stepParams", "self_params"]),
-            context.stepResults,
+            this.options.inputs as Record<string, any>,
           ),
         );
 
@@ -361,6 +373,28 @@ export class Pipeline {
               pipe.options.params || {},
             ),
           );
+
+        if(!!pipe.options.inputs) {
+          if(lodash.isString(pipe.options.inputs)) {
+            const pipeOutput = lodash.get(context, ["stepResults", pipe.options.inputs]);
+            if(!pipeOutput) {
+              throw new Error(`Pipe ${pipe.options.id} 不存在输出 ${pipe.options.inputs}`);
+            }
+            lastOutput = pipeOutput;
+          }
+          if(isRecordOfString(pipe.options.inputs)){
+            lodash.forEach(pipe.options.inputs as Record<string,string>, (value, key) => {
+              const pipeOutput = lodash.get(context, ["stepResults", value]);
+              if(!pipeOutput) {
+                throw new Error(`Pipe ${pipe.options.id} 不存在输出 ${value}`);
+              }
+              if(key === "input") {
+                lastOutput = pipeOutput;
+              }
+              lodash.set(pipe.options.inputs as Record<string,string>, key, pipeOutput);
+            });
+          }
+        }
 
         lastOutput = await pipe.execute(lastOutput, context);
         emitter.emit("stepComplete", i + 1, this.pipes.length, lastOutput); //可能会被onProgress取代
