@@ -21,3 +21,10 @@ npm exec prettier -- --loglevel=warn --write .
 # import the output ESM
 (cd dist && node -e 'require("@idealeap/pipeline")')
 (cd dist && node -e 'import("@idealeap/pipeline")' --input-type=module)
+
+# Path: build-docs
+api-extractor run --local --verbose
+rm -rf docs/api;
+rm -rf temp;
+rm -rf etc;
+npx api-documenter markdown --input-folder './temp' --output-folder './docs/api'

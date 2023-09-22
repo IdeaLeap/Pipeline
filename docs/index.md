@@ -4,12 +4,12 @@ layout: home
 
 hero:
   name: "Pipeline"
-  text: "@idealeap/pipeline"
+  text: "for low-code"
   tagline: A Lightweight Low-code Pipeline code by GPT-4.
   actions:
     - theme: brand
       text: Get Started
-      link: /pipeline
+      link: /guide/pipeline
     - theme: alt
       text: Star✨
       link: https://github.com/IdeaLeap/Pipline

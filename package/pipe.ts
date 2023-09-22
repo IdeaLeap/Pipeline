@@ -36,6 +36,7 @@ export interface PipeOptions<T, R> extends BatchOptions<T, R> {
   batch?: boolean;
   type?: string;
   params?: Record<string, any>;
+  input?: string;
 }
 
 export interface PipelineContext {
