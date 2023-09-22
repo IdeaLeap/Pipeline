@@ -24,7 +24,5 @@ npm exec prettier -- --loglevel=warn --write .
 
 # Path: build-docs
 api-extractor run --local --verbose
-rm -rf docs/api;
-rm -rf temp;
-rm -rf etc;
+rm -rf docs/api;mkdir -p docs/api
 npx api-documenter markdown --input-folder './temp' --output-folder './docs/api'

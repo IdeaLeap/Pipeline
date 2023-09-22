@@ -1,24 +1,32 @@
 // 本代码由GPT4生成，具体可见https://pandora.idealeap.cn/share/33072598-a95f-4188-9003-76ccc5d964cb
 import { batchDecorator, BatchOptions } from "@idealeap/pipeline/batch/index";
 import { PipeRegistryType } from "@idealeap/pipeline/registry";
-import { replaceSlots,mergeJSONSafely,isRecordOfString } from "@idealeap/pipeline/utils";
+import {
+  replaceSlots,
+  mergeJSONSafely,
+  isRecordOfString,
+} from "@idealeap/pipeline/utils";
 import lodash from "lodash";
 
 /**
  * Represents a value that can be either a direct value of type `T` or a Promise that resolves to type `T`.
  * Useful for functions that might return a value synchronously or asynchronously.
- * 
+ *
  * @typeParam T - The underlying type of the value or Promise.
+ *
+ * @public
  */
 export type MaybePromise<T> = T | Promise<T>;
 
 /**
  * A simple implementation of an event emitter.
- * 
+ *
  * The `EventEmitter` class provides methods to subscribe to events (`on`) and to trigger those events (`emit`).
+ *
+ * @public
  */
 export class EventEmitter {
-    /**
+  /**
    * Holds a record of all events and their respective listeners.
    * The key represents the event name, and the value is an array of listener functions for that event.
    */
@@ -26,13 +34,15 @@ export class EventEmitter {
 
   /**
    * Subscribes a listener function to a specified event.
-   * 
+   *
    * @param event - The name of the event to which the listener should be subscribed.
    * @param listener - The callback function that will be invoked when the event is emitted.
-   * 
+   *
    * @example
+   * ```js
    * const emitter = new EventEmitter();
    * emitter.on('data', (data) => console.log(data));
+   * ```
    */
   on(event: string, listener: (...args: any[]) => void) {
     this.events = lodash.defaults(this.events, {});
@@ -42,64 +52,173 @@ export class EventEmitter {
 
   /**
    * Emits a specified event with the provided arguments, invoking all subscribed listeners for that event.
-   * 
+   *
    * @param event - The name of the event to emit.
    * @param args - The arguments to pass to each listener function.
-   * 
+   *
    * @example
+   * ```js
    * const emitter = new EventEmitter();
    * emitter.emit('data', { message: 'Hello World' });
+   * ```
    */
   emit(event: string, ...args: any[]) {
     lodash.forEach(this.events[event], (listener) => listener(...args));
   }
 }
 
+/**
+ * Options for configuring a pipe.
+ *
+ * The `PipeOptions` interface extends the `BatchOptions` interface, adding more configurations specific to pipes.
+ *
+ * @typeParam T - The type of the input data for the pipe.
+ * @typeParam R - The type of the result produced by the pipe.
+ *
+ * @public
+ */
 export interface PipeOptions<T, R> extends BatchOptions<T, R> {
+  /** A unique identifier for the pipe. */
   id: string;
+  /** An optional description of the pipe. */
   description?: string;
+  /** The number of times to retry the pipe in case of failure. */
   retries?: number;
+  /** The maximum duration (in milliseconds) before timing out the pipe. */
   timeout?: number;
+  /**
+   * An optional function to preprocess the input data before passing it to the pipe.
+   *
+   * @param input - The original input data.
+   * @param context - The current pipeline context.
+   */
   preProcess?: (input: T, context: PipelineContext) => MaybePromise<T>;
+  /** The funcName of preprocessing. */
   preProcessType?: string;
+  /**
+   * An optional function to postprocess the result data after it's produced by the pipe.
+   *
+   * @param result - The result produced by the pipe.
+   * @param context - The current pipeline context.
+   */
   postProcess?: (result: R, context: PipelineContext) => MaybePromise<R>;
+  /** The funcName of postprocessing. */
   postProcessType?: string;
+  /**
+   * An optional function to handle errors that occur during the execution of the pipe.
+   *
+   * @param error - The error that occurred.
+   * @param context - The current pipeline context.
+   * @returns A boolean indicating whether the error was successfully handled.
+   */
   errProcess?: (error: any, context: PipelineContext) => MaybePromise<boolean>;
+  /** The funcName of error processing. */
   errProcessType?: string;
+  /** An optional function to clean up resources when the pipe is destroyed. */
   destroyProcess?: () => void;
+  /** The funcName of destroy processing. */
   destroyProcessType?: string;
+  /** A flag indicating whether batching should be used. If `true`, the pipe will handle inputs in batches. */
   batch?: boolean;
+  /** An optional identifier indicating the type or category of the pipe. */
   type?: string;
+  /** An optional set of parameters to configure the pipe's behavior. */
   params?: Record<string, any>;
+  /**
+   * The inputs for the pipe. This can either be a record (object) of named inputs,
+   * or a string representing a single input value.
+   */
   inputs?: Record<string, any> | string;
 }
 
+/**
+ * Represents the context in which a pipeline operates.
+ *
+ * @public
+ */
 export interface PipelineContext {
+  /** A record of results from previously executed steps in the pipeline. */
   stepResults: Record<string, any>;
+  /** A record of parameters for the steps in the pipeline. */
   stepParams: Record<string, any>;
+  /** An event emitter for the pipeline to emit and listen to custom events. */
   emitter: EventEmitter;
+  /** An abort controller to signal and handle aborting pipeline operations. */
   abortController: AbortController;
 }
 
+/**
+ * Options for configuring a pipeline.
+ *
+ * @public
+ */
 export interface PipelineOptions {
+  /**
+   * An optional callback function that gets called during the pipeline's execution to report progress.
+   *
+   * @param completed - The number of steps that have been completed.
+   * @param total - The total number of steps in the pipeline.
+   */
   onProgress?: (completed: number, total: number) => void;
+  /** An optional custom event emitter to use for the pipeline. */
   emitter?: EventEmitter;
+  /** An optional function to clean up resources when the pipeline is destroyed. */
   destroyProcess?: () => void;
+  /**
+   * An optional function to handle errors that occur during the execution of the pipeline.
+   *
+   * @param error - The error that occurred.
+   * @param context - The current pipeline context.
+   * @returns A boolean indicating whether the error was successfully handled.
+   */
   errProcess?: (error: any, context: PipelineContext) => MaybePromise<boolean>;
+  /** Optional global parameters to be used by all steps in the pipeline which will be inserted to pipe's context self_params */
   globalParams?: Record<string, any>;
 }
 
+/**
+ * Represents serializable options for a pipe. It's a type alias for the `PipeOptions` interface
+ * that does not constrain the types of its input or result, making it usable in contexts
+ * where generic type parameters might not be specified.
+ *
+ * @public
+ */
 export type SerializablePipeOptions = PipeOptions<any, any>;
 
+/**
+ * Represents serializable options for a pipeline.
+ * It extends `PipelineOptions` with an array of `SerializablePipeOptions` to represent individual pipe configurations.
+ *
+ * @public
+ */
 export interface SerializablePipelineOptions extends PipelineOptions {
   pipes: SerializablePipeOptions[];
 }
 
-
+/**
+ * Asynchronously resolves a value that might be a promise.
+ * If the input is a promise, it waits for it to resolve, otherwise it returns the input directly.
+ *
+ * @typeParam T - The type of value being resolved.
+ * @param input - A value or a promise of a value.
+ * @returns A promise that resolves to the value.
+ *
+ * @internal
+ */
 const maybeAwait = async <T>(input: MaybePromise<T>) =>
   await Promise.resolve(input);
 
-// 用于处理超时的函数
+/**
+ * Wraps a promise (or a value) with a timeout. If the promise doesn't resolve within the given timeout,
+ * it gets rejected with a "Timeout" error.
+ *
+ * @typeParam T - The type of value the promise resolves to.
+ * @param promise - A promise or a value that should be wrapped with a timeout.
+ * @param timeout - The timeout duration in milliseconds.
+ * @returns A promise that either resolves to the original promise's value, or rejects with a "Timeout" error.
+ *
+ * @internal
+ */
 const withTimeout = <T>(
   promise: MaybePromise<T>,
   timeout: number,
@@ -110,13 +229,34 @@ const withTimeout = <T>(
   return Promise.race([promise, timer]);
 };
 
-// Pipe 类定义
+/**
+ * Represents a processing unit within a pipeline.
+ * It encapsulates a callback function and various options to control its behavior.
+ *
+ * @typeParam T - The input type for the pipe.
+ * @typeParam R - The result type of the pipe.
+ *
+ * @public
+ */
 export class Pipe<T, R> {
+  /**
+   * Constructs a new instance of the Pipe.
+   *
+   * @param callback - The core processing function for this pipe.
+   * @param options - Configuration options for this pipe.
+   */
   constructor(
     private callback: (input: T, context: PipelineContext) => MaybePromise<R>,
     public options: PipeOptions<T, R>,
   ) {}
 
+  /**
+   * Processes the input using the provided `preProcess` option, if available.
+   *
+   * @param input - The initial input to the pipe.
+   * @param context - The current pipeline context.
+   * @returns The pre-processed input or the original input if no `preProcess` is specified.
+   */
   private async handlePreProcess(
     input: T,
     context: PipelineContext,
@@ -126,6 +266,13 @@ export class Pipe<T, R> {
       : input;
   }
 
+  /**
+   * Processes the result using the provided `postProcess` option, if available.
+   *
+   * @param result - The result from the main pipe callback.
+   * @param context - The current pipeline context.
+   * @returns The post-processed result or the original result if no `postProcess` is specified.
+   */
   private async handlePostProcess(
     result: R,
     context: PipelineContext,
@@ -135,6 +282,15 @@ export class Pipe<T, R> {
       : result;
   }
 
+  /**
+   * Executes the pipe's main functionality, handling batching if enabled, and managing
+   * retries, errors, pre-processing, and post-processing.
+   *
+   * @param input - The input to the pipe, which can be an array if batching is enabled.
+   * @param context - The current pipeline context.
+   * @returns The result of the pipe's execution, which can be an array if batching is enabled.
+   * @throws Will throw an error if an invalid ID is used or if batching mode isn't enabled for an array input.
+   */
   async execute(input: T | T[], context: PipelineContext): Promise<R | R[]> {
     if (
       this.options.id === "self_params" ||
@@ -168,6 +324,14 @@ export class Pipe<T, R> {
     }
   }
 
+  /**
+   * Handles the main execution of the pipe, including retries and error processing.
+   *
+   * @param input - The input to the pipe.
+   * @param context - The current pipeline context.
+   * @returns The result of the pipe's execution.
+   * @throws Will throw an error if all retries are exhausted or if the operation is cancelled.
+   */
   private async handleExecution(
     input: T,
     context: PipelineContext,
@@ -181,14 +345,15 @@ export class Pipe<T, R> {
         }
 
         // 处理依赖项
-        !lodash.isString(this.options.inputs) && lodash.set(
-          context,
-          ["stepParams", "self_params"],
-          replaceSlots(
-            lodash.get(context, ["stepParams", "self_params"]),
-            this.options.inputs as Record<string, any>,
-          ),
-        );
+        !lodash.isString(this.options.inputs) &&
+          lodash.set(
+            context,
+            ["stepParams", "self_params"],
+            replaceSlots(
+              lodash.get(context, ["stepParams", "self_params"]),
+              this.options.inputs as Record<string, any>,
+            ),
+          );
 
         let promise = this.callback(
           await this.handlePreProcess(input, context),
@@ -227,7 +392,14 @@ export class Pipe<T, R> {
     }
   }
 
-  // 从一个 SerializablePipeOptions 对象创建一个 Pipe 实例
+  /**
+   * Creates a new `Pipe` instance from a serializable options object.
+   *
+   * @param json - The serializable pipe options.
+   * @param callback - The processing function.
+   * @param predefinedTypes - An optional registry of predefined callback types.
+   * @returns A new instance of the Pipe.
+   */
   static fromJSON<T, R>(
     json: SerializablePipeOptions,
     callback: (input: T, context: PipelineContext) => MaybePromise<R>,
@@ -285,7 +457,13 @@ export class Pipe<T, R> {
     return new Pipe(callback, json as PipeOptions<T, R>);
   }
 
-  // 新增一个 static 方法用于创建新实例，并支持链式调用
+  /**
+   * Creates and returns a new `Pipe` instance. This static method is designed to support chaining.
+   *
+   * @param callback - The core processing function for the new pipe.
+   * @param options - Optional configuration options for the new pipe.
+   * @returns A new instance of the Pipe.
+   */
   static create<T, R>(
     callback: (input: T, context: PipelineContext) => MaybePromise<R>,
     options?: Partial<PipeOptions<T, R>>,
@@ -293,27 +471,55 @@ export class Pipe<T, R> {
     return new Pipe(callback, options as PipeOptions<T, R>);
   }
 
+  /**
+   * Sets the ID of the pipe.
+   *
+   * @param id - The ID to be assigned.
+   * @returns The same pipe instance, to support method chaining.
+   */
   setId(id: string): this {
     this.options.id = id;
     return this;
   }
 
+  /**
+   * Sets the description of the pipe.
+   *
+   * @param description - The description to be assigned.
+   * @returns The same pipe instance, to support method chaining.
+   */
   setDescription(description: string): this {
     this.options.description = description;
     return this;
   }
 
+  /**
+   * Set `batch = true` for the pipe.
+   *
+   * @returns The same pipe instance, to support method chaining.
+   */
   enableBatching(): this {
     this.options.batch = true;
     return this;
   }
 
+  /**
+   * Sets the number of retries for the pipe.
+   *
+   * @param retries - The number of retries to be assigned.
+   * @returns The same pipe instance, to support method chaining.
+   */
   setRetries(retries: number): this {
     this.options.retries = retries;
     return this;
   }
 
-  // 添加一个动态依赖检查函数，返回一个布尔值以确定是否应执行该 Pipe
+  /**
+   * Sets a dynamic dependency check function that returns a boolean to determine whether the pipe should be executed.
+   * @param context - The current pipeline context.
+   * @returns A boolean indicating whether the pipe should be executed.
+   *
+   */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   shouldExecute(context: PipelineContext): boolean {
     // 自定义逻辑，例如：
@@ -322,22 +528,44 @@ export class Pipe<T, R> {
   }
 }
 
-// 主函数
+/**
+ * Represents a pipeline that consists of multiple pipes, offering methods to execute them sequentially,
+ * add or remove pipes, and serialize the pipeline configuration.
+ *
+ * @public
+ */
 export class Pipeline {
   private pipes: Pipe<any, any>[] = [];
   private options: PipelineOptions;
-
+  /**
+   * Constructs a new Pipeline instance.
+   *
+   * @param pipes - An array of pipes to be executed by the pipeline.
+   * @param options - Optional settings for the pipeline's behavior.
+   */
   constructor(pipes: Pipe<any, any>[], options: PipelineOptions = {}) {
     this.pipes = pipes;
     this.options = options;
   }
 
-  // 删除 Pipe
+  /**
+   * Removes a pipe from the pipeline based on its ID.
+   *
+   * @param id - The ID of the pipe to be removed.
+   * @returns The updated pipeline instance.
+   */
   removePipe(id: string): this {
     this.pipes = lodash.filter(this.pipes, (pipe) => pipe.options.id !== id);
     return this;
   }
 
+  /**
+   * Executes the pipeline using the provided input.
+   *
+   * @param input - The initial input for the pipeline.
+   * @returns A record containing the results of each pipe's execution.
+   * @throws Will throw an error if an expected output is missing or if an invalid configuration is detected.
+   */
   async execute(
     input?: any,
   ): Promise<Record<string, any> | Record<string, any>[]> {
@@ -374,25 +602,39 @@ export class Pipeline {
             ),
           );
 
-        if(!!pipe.options.inputs) {
-          if(lodash.isString(pipe.options.inputs)) {
-            const pipeOutput = lodash.get(context, ["stepResults", pipe.options.inputs]);
-            if(!pipeOutput) {
-              throw new Error(`Pipe ${pipe.options.id} 不存在输出 ${pipe.options.inputs}`);
+        if (!!pipe.options.inputs) {
+          if (lodash.isString(pipe.options.inputs)) {
+            const pipeOutput = lodash.get(context, [
+              "stepResults",
+              pipe.options.inputs,
+            ]);
+            if (!pipeOutput) {
+              throw new Error(
+                `Pipe ${pipe.options.id} 不存在输出 ${pipe.options.inputs}`,
+              );
             }
             lastOutput = pipeOutput;
           }
-          if(isRecordOfString(pipe.options.inputs)){
-            lodash.forEach(pipe.options.inputs as Record<string,string>, (value, key) => {
-              const pipeOutput = lodash.get(context, ["stepResults", value]);
-              if(!pipeOutput) {
-                throw new Error(`Pipe ${pipe.options.id} 不存在输出 ${value}`);
-              }
-              if(key === "input") {
-                lastOutput = pipeOutput;
-              }
-              lodash.set(pipe.options.inputs as Record<string,string>, key, pipeOutput);
-            });
+          if (isRecordOfString(pipe.options.inputs)) {
+            lodash.forEach(
+              pipe.options.inputs as Record<string, string>,
+              (value, key) => {
+                const pipeOutput = lodash.get(context, ["stepResults", value]);
+                if (!pipeOutput) {
+                  throw new Error(
+                    `Pipe ${pipe.options.id} 不存在输出 ${value}`,
+                  );
+                }
+                if (key === "input") {
+                  lastOutput = pipeOutput;
+                }
+                lodash.set(
+                  pipe.options.inputs as Record<string, string>,
+                  key,
+                  pipeOutput,
+                );
+              },
+            );
           }
         }
 
@@ -407,7 +649,16 @@ export class Pipeline {
 
     return context.stepResults;
   }
-  // 从一个 SerializablePipelineOptions 和函数映射创建一个 Pipeline
+
+  /**
+   * Constructs a new Pipeline instance from a serializable configuration and a mapping of functions.
+   *
+   * @param json - The serializable pipeline configuration.
+   * @param fnMap - A mapping of pipe IDs to their corresponding functions.
+   * @param predefinedTypes - Optional predefined pipe types.
+   * @returns A new Pipeline instance.
+   * @throws Will throw an error if the configuration is invalid or if a function is not found for a given ID.
+   */
   static fromJSON(
     json: SerializablePipelineOptions,
     fnMap: Record<
@@ -439,12 +690,22 @@ export class Pipeline {
     return new Pipeline(pipes, json);
   }
 
-  // 新增一个 static 方法用于创建新实例，并支持链式调用
+  /**
+   * Constructs a new empty Pipeline instance, supporting chainable method calls.
+   *
+   * @param options - Optional settings for the pipeline's behavior.
+   * @returns A new Pipeline instance.
+   */
   static create(options?: PipelineOptions): Pipeline {
     return new Pipeline([], options);
   }
 
-  // 添加 Pipe 并返回 this，以支持链式调用
+  /**
+   * Adds one or more pipes to the pipeline.
+   *
+   * @param pipe - A single pipe or an array of pipes to add to the pipeline.
+   * @returns The updated pipeline instance.
+   */
   addPipe<T, R>(pipe: Pipe<T, R> | Pipe<T, R>[]): this {
     if (Array.isArray(pipe)) {
       this.pipes = this.pipes.concat(pipe);
@@ -454,13 +715,22 @@ export class Pipeline {
     return this;
   }
 
-  // 设置进度回调并返回 this，以支持链式调用
+  /**
+   * Sets a callback to track the pipeline's execution progress.
+   *
+   * @param callback - A function that is called with the number of completed pipes and the total number of pipes.
+   * @returns The updated pipeline instance.
+   */
   setOnProgress(callback: (completed: number, total: number) => void): this {
     this.options.onProgress = callback;
     return this;
   }
 
-  // 序列化为 JSON 的方法
+  /**
+   * Serializes the pipeline's configuration to a JSON-friendly format.
+   *
+   * @returns A serializable representation of the pipeline's configuration.
+   */
   toJSON(): SerializablePipelineOptions {
     return {
       pipes: this.pipes.map((pipe) => ({
