@@ -9,7 +9,7 @@ Creates a new `Pipe` instance from a serializable options object.
 **Signature:**
 
 ```typescript
-static fromJSON<T, R>(json: SerializablePipeOptions, callback: (input: T, context: PipelineContext) => MaybePromise<R>, predefinedTypes?: PipeRegistryType): Pipe<T, R>;
+static fromJSON<T, R>(json: SerializablePipeOptions, callback: (input: T, context: PipelineContext) => MaybePromise<R>, predefinedUses?: PipeRegistryType): Pipe<T, R>;
 ```
 
 ## Parameters
@@ -18,7 +18,7 @@ static fromJSON<T, R>(json: SerializablePipeOptions, callback: (input: T, contex
 |  --- | --- | --- |
 |  json | [SerializablePipeOptions](./pipeline.serializablepipeoptions.md) | The serializable pipe options. |
 |  callback | (input: T, context: [PipelineContext](./pipeline.pipelinecontext.md)<!-- -->) =&gt; [MaybePromise](./pipeline.maybepromise.md)<!-- -->&lt;R&gt; | The processing function. |
-|  predefinedTypes | [PipeRegistryType](./pipeline.piperegistrytype.md) | _(Optional)_ An optional registry of predefined callback types. |
+|  predefinedUses | [PipeRegistryType](./pipeline.piperegistrytype.md) | _(Optional)_ An optional registry of predefined functions. |
 
 **Returns:**
 

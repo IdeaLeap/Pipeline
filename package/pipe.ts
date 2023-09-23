@@ -94,7 +94,7 @@ export interface PipeOptions<T, R> extends BatchOptions<T, R> {
    */
   preProcess?: (input: T, context: PipelineContext) => MaybePromise<T>;
   /** The funcName of preprocessing. */
-  preProcessType?: string;
+  preProcessUse?: string;
   /**
    * An optional function to postprocess the result data after it's produced by the pipe.
    *
@@ -103,7 +103,7 @@ export interface PipeOptions<T, R> extends BatchOptions<T, R> {
    */
   postProcess?: (result: R, context: PipelineContext) => MaybePromise<R>;
   /** The funcName of postprocessing. */
-  postProcessType?: string;
+  postProcessUse?: string;
   /**
    * An optional function to handle errors that occur during the execution of the pipe.
    *
@@ -113,15 +113,15 @@ export interface PipeOptions<T, R> extends BatchOptions<T, R> {
    */
   errProcess?: (error: any, context: PipelineContext) => MaybePromise<boolean>;
   /** The funcName of error processing. */
-  errProcessType?: string;
+  errProcessUse?: string;
   /** An optional function to clean up resources when the pipe is destroyed. */
   destroyProcess?: () => void;
   /** The funcName of destroy processing. */
-  destroyProcessType?: string;
+  destroyProcessUse?: string;
   /** A flag indicating whether batching should be used. If `true`, the pipe will handle inputs in batches. */
   batch?: boolean;
-  /** An optional identifier indicating the type or category of the pipe. */
-  type?: string;
+  /** An predefined funcName. */
+  use?: string;
   /** An optional set of parameters to configure the pipe's behavior. */
   params?: Record<string, any>;
   /**
@@ -397,51 +397,51 @@ export class Pipe<T, R> {
    *
    * @param json - The serializable pipe options.
    * @param callback - The processing function.
-   * @param predefinedTypes - An optional registry of predefined callback types.
+   * @param predefinedUses - An optional registry of predefined functions.
    * @returns A new instance of the Pipe.
    */
   static fromJSON<T, R>(
     json: SerializablePipeOptions,
     callback: (input: T, context: PipelineContext) => MaybePromise<R>,
-    predefinedTypes?: PipeRegistryType,
+    predefinedUses?: PipeRegistryType,
   ): Pipe<T, R> {
     if (
-      json.preProcessType &&
-      !!predefinedTypes &&
-      !!predefinedTypes.get(json.preProcessType)
+      json.preProcessUse &&
+      !!predefinedUses &&
+      !!predefinedUses.get(json.preProcessUse)
     ) {
-      (json as PipeOptions<T, R>).preProcess = predefinedTypes.get(
-        json.preProcessType,
+      (json as PipeOptions<T, R>).preProcess = predefinedUses.get(
+        json.preProcessUse,
       ) as unknown as (input: T, context: PipelineContext) => MaybePromise<T>;
     }
     if (
-      json.postProcessType &&
-      !!predefinedTypes &&
-      !!predefinedTypes.get(json.postProcessType)
+      json.postProcessUse &&
+      !!predefinedUses &&
+      !!predefinedUses.get(json.postProcessUse)
     ) {
-      (json as PipeOptions<T, R>).postProcess = predefinedTypes?.get(
-        json.postProcessType,
+      (json as PipeOptions<T, R>).postProcess = predefinedUses?.get(
+        json.postProcessUse,
       ) as unknown as (input: R, context: PipelineContext) => MaybePromise<R>;
     }
     if (
-      json.errProcessType &&
-      !!predefinedTypes &&
-      !!predefinedTypes.get(json.errProcessType)
+      json.errProcessUse &&
+      !!predefinedUses &&
+      !!predefinedUses.get(json.errProcessUse)
     ) {
-      (json as PipeOptions<T, R>).errProcess = predefinedTypes?.get(
-        json.errProcessType,
+      (json as PipeOptions<T, R>).errProcess = predefinedUses?.get(
+        json.errProcessUse,
       ) as unknown as (
         error: any,
         context: PipelineContext,
       ) => MaybePromise<boolean>;
     }
-    if (json.destroyProcessType) {
-      (json as PipeOptions<T, R>).destroyProcess = predefinedTypes?.get(
-        json.destroyProcessType,
+    if (json.destroyProcessUse) {
+      (json as PipeOptions<T, R>).destroyProcess = predefinedUses?.get(
+        json.destroyProcessUse,
       ) as () => void;
     }
-    if (json.type && predefinedTypes) {
-      const predefinedCallback = predefinedTypes.get(json.type) as unknown as (
+    if (json.use && predefinedUses) {
+      const predefinedCallback = predefinedUses.get(json.use) as unknown as (
         input: T,
         context: PipelineContext,
       ) => any;
@@ -655,7 +655,7 @@ export class Pipeline {
    *
    * @param json - The serializable pipeline configuration.
    * @param fnMap - A mapping of pipe IDs to their corresponding functions.
-   * @param predefinedTypes - Optional predefined pipe types.
+   * @param predefinedUses - Optional predefined pipe functions.
    * @returns A new Pipeline instance.
    * @throws Will throw an error if the configuration is invalid or if a function is not found for a given ID.
    */
@@ -665,7 +665,7 @@ export class Pipeline {
       string,
       (input: any, context: PipelineContext) => MaybePromise<any>
     >,
-    predefinedTypes?: PipeRegistryType,
+    predefinedUses?: PipeRegistryType,
   ): Pipeline {
     if (!Array.isArray(json.pipes)) {
       throw new Error("Invalid JSON configuration: 'pipes' must be an array");
@@ -674,8 +674,8 @@ export class Pipeline {
     const pipes = json.pipes.map((pipeJson: SerializablePipeOptions) => {
       const fn =
         fnMap[pipeJson.id] ||
-        (predefinedTypes && pipeJson.type
-          ? predefinedTypes.get(pipeJson.type)
+        (predefinedUses && pipeJson.use
+          ? predefinedUses.get(pipeJson.use)
           : undefined);
       if (!fn) {
         throw new Error(`Function not found for id: ${pipeJson.id}`);
@@ -683,7 +683,7 @@ export class Pipeline {
       return Pipe.fromJSON(
         pipeJson,
         fn as (input: any, context: PipelineContext) => any,
-        predefinedTypes,
+        predefinedUses,
       );
     });
 
@@ -739,12 +739,12 @@ export class Pipeline {
         retries: pipe.options.retries,
         timeout: pipe.options.timeout,
         batch: pipe.options.batch,
-        type: pipe.options.type,
+        use: pipe.options.use,
         params: pipe.options.params,
-        preProcessType: pipe.options.preProcessType,
-        postProcessType: pipe.options.postProcessType,
-        errProcessType: pipe.options.errProcessType,
-        destroyProcessType: pipe.options.destroyProcessType,
+        preProcessUse: pipe.options.preProcessUse,
+        postProcessUse: pipe.options.postProcessUse,
+        errProcessUse: pipe.options.errProcessUse,
+        destroyProcessUse: pipe.options.destroyProcessUse,
       })) as SerializablePipeOptions[],
     };
   }

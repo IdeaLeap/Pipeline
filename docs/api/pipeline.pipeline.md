@@ -25,7 +25,7 @@ export declare class Pipeline
 |  [addPipe(pipe)](./pipeline.pipeline.addpipe.md) |  | Adds one or more pipes to the pipeline. |
 |  [create(options)](./pipeline.pipeline.create.md) | <code>static</code> | Constructs a new empty Pipeline instance, supporting chainable method calls. |
 |  [execute(input)](./pipeline.pipeline.execute.md) |  | Executes the pipeline using the provided input. |
-|  [fromJSON(json, fnMap, predefinedTypes)](./pipeline.pipeline.fromjson.md) | <code>static</code> | Constructs a new Pipeline instance from a serializable configuration and a mapping of functions. |
+|  [fromJSON(json, fnMap, predefinedUses)](./pipeline.pipeline.fromjson.md) | <code>static</code> | Constructs a new Pipeline instance from a serializable configuration and a mapping of functions. |
 |  [removePipe(id)](./pipeline.pipeline.removepipe.md) |  | Removes a pipe from the pipeline based on its ID. |
 |  [setOnProgress(callback)](./pipeline.pipeline.setonprogress.md) |  | Sets a callback to track the pipeline's execution progress. |
 |  [toJSON()](./pipeline.pipeline.tojson.md) |  | Serializes the pipeline's configuration to a JSON-friendly format. |

@@ -9,7 +9,7 @@ Constructs a new Pipeline instance from a serializable configuration and a mappi
 **Signature:**
 
 ```typescript
-static fromJSON(json: SerializablePipelineOptions, fnMap: Record<string, (input: any, context: PipelineContext) => MaybePromise<any>>, predefinedTypes?: PipeRegistryType): Pipeline;
+static fromJSON(json: SerializablePipelineOptions, fnMap: Record<string, (input: any, context: PipelineContext) => MaybePromise<any>>, predefinedUses?: PipeRegistryType): Pipeline;
 ```
 
 ## Parameters
@@ -18,7 +18,7 @@ static fromJSON(json: SerializablePipelineOptions, fnMap: Record<string, (input:
 |  --- | --- | --- |
 |  json | [SerializablePipelineOptions](./pipeline.serializablepipelineoptions.md) | The serializable pipeline configuration. |
 |  fnMap | Record&lt;string, (input: any, context: [PipelineContext](./pipeline.pipelinecontext.md)<!-- -->) =&gt; [MaybePromise](./pipeline.maybepromise.md)<!-- -->&lt;any&gt;&gt; | A mapping of pipe IDs to their corresponding functions. |
-|  predefinedTypes | [PipeRegistryType](./pipeline.piperegistrytype.md) | _(Optional)_ Optional predefined pipe types. |
+|  predefinedUses | [PipeRegistryType](./pipeline.piperegistrytype.md) | _(Optional)_ Optional predefined pipe functions. |
 
 **Returns:**
 

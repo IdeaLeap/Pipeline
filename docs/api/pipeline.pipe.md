@@ -31,7 +31,7 @@ export declare class Pipe<T, R>
 |  [create(callback, options)](./pipeline.pipe.create.md) | <code>static</code> | Creates and returns a new <code>Pipe</code> instance. This static method is designed to support chaining. |
 |  [enableBatching()](./pipeline.pipe.enablebatching.md) |  | Set <code>batch = true</code> for the pipe. |
 |  [execute(input, context)](./pipeline.pipe.execute.md) |  | Executes the pipe's main functionality, handling batching if enabled, and managing retries, errors, pre-processing, and post-processing. |
-|  [fromJSON(json, callback, predefinedTypes)](./pipeline.pipe.fromjson.md) | <code>static</code> | Creates a new <code>Pipe</code> instance from a serializable options object. |
+|  [fromJSON(json, callback, predefinedUses)](./pipeline.pipe.fromjson.md) | <code>static</code> | Creates a new <code>Pipe</code> instance from a serializable options object. |
 |  [setDescription(description)](./pipeline.pipe.setdescription.md) |  | Sets the description of the pipe. |
 |  [setId(id)](./pipeline.pipe.setid.md) |  | Sets the ID of the pipe. |
 |  [setRetries(retries)](./pipeline.pipe.setretries.md) |  | Sets the number of retries for the pipe. |

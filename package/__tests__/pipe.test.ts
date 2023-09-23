@@ -163,12 +163,12 @@ test("Pipeline with pipeRegistry", async () => {
     pipes: [
       {
         id: "FetchData",
-        type: "FetchData",
+        use: "FetchData",
       },
       {
         id: "TransformData",
-        type: "TransformData",
-        postProcessType: "postProcess",
+        use: "TransformData",
+        postProcessUse: "postProcess",
       },
     ],
   };
@@ -189,7 +189,7 @@ test("Pipeline with pipeRegistry", async () => {
   // 执行
   await newPipeline.execute().then(console.log);
   expect(jsonConfig).toEqual(
-    `{"pipes":[{"id":"FetchData","type":"FetchData"},{"id":"TransformData","type":"TransformData","postProcessType":"postProcess"}]}`,
+    `{"pipes":[{"id":"FetchData","use":"FetchData"},{"id":"TransformData","use":"TransformData","postProcessUse":"postProcess"}]}`,
   );
 });
 test("Pipe的Emitter和依赖", async () => {
@@ -279,12 +279,12 @@ test("Pipe获取初始输入和当前参数", async () => {
     pipes: [
       {
         id: "step1_",
-        type: "step1",
+        use: "step1",
         params: { test: "test!!" },
       },
       {
         id: "step2_",
-        type: "step2",
+        use: "step2",
         inputs: {
           FetchData: "step1_",
         },
@@ -292,7 +292,7 @@ test("Pipe获取初始输入和当前参数", async () => {
       },
       {
         id: "step3_",
-        type: "step3",
+        use: "step3",
         inputs: {
           input: "step1_", //这里的input是step1_的结果
         },
@@ -318,7 +318,7 @@ test("Pipe使用globalParams", async () => {
     pipes: [
       {
         id: "FetchData",
-        type: "step1",
+        use: "step1",
         params: { test: "test!!" },
       },
     ],

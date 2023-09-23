@@ -193,12 +193,12 @@ const pipelineJson = {
   pipes: [
     {
       id: "FetchData",
-      type: "FetchData",
+      use: "FetchData",
     },
     {
       id: "TransformData",
-      type: "TransformData",
-      postProcessType: "postProcess",
+      use: "TransformData",
+      postProcessUse: "postProcess",
     },
   ],
 };
