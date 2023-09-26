@@ -667,7 +667,7 @@ export class Pipeline {
     >,
     predefinedUses?: PipeRegistryType,
   ): Pipeline {
-    if (!Array.isArray(json.pipes)) {
+    if (lodash.has(json,"pipes") || !Array.isArray(json.pipes)) {
       throw new Error("Invalid JSON configuration: 'pipes' must be an array");
     }
 
