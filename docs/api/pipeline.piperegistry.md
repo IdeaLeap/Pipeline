@@ -14,9 +14,10 @@ export declare class PipeRegistry
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
+|  [\_Fn](./pipeline.piperegistry._fn.md) |  | { DynamicExecutor: (input: any, context: [PipelineContext](./pipeline.pipelinecontext.md)<!-- -->) =&gt; Promise&lt;any&gt;; } |  |
 |  [commonPostProcess](./pipeline.piperegistry.commonpostprocess.md) | <code>static</code> | { logData: (result: any, context: [PipelineContext](./pipeline.pipelinecontext.md)<!-- -->) =&gt; any; } |  |
 |  [commonPreProcess](./pipeline.piperegistry.commonpreprocess.md) | <code>static</code> | { validateData: (input: any, context: [PipelineContext](./pipeline.pipelinecontext.md)<!-- -->) =&gt; any; } |  |
-|  [customFn](./pipeline.piperegistry.customfn.md) | <code>static</code> | Record&lt;string, (result: any, context: [PipelineContext](./pipeline.pipelinecontext.md)<!-- -->) =&gt; any&gt; |  |
+|  [customFn](./pipeline.piperegistry.customfn.md) | <code>static</code> | Record&lt;string, (input: any, context: [PipelineContext](./pipeline.pipelinecontext.md)<!-- -->) =&gt; any&gt; |  |
 
 ## Methods
 

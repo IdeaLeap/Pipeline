@@ -1,5 +1,5 @@
 import { MaybePromise, PipelineContext } from "@idealeap/pipeline/pipe";
-import { DynamicExecutor } from "@idealeap/pipeline/executor";
+import { DynamicExecutor } from "@idealeap/pipeline/executor/index";
 import lodash from "lodash";
 export type PipeRegistryType = PipeRegistry;
 
@@ -46,18 +46,12 @@ export class PipeRegistry {
     DynamicExecutor: async (input: any, context: PipelineContext) => {
       const params = context.stepParams["self_params"];
       const executor = new DynamicExecutor(params);
-      if(lodash.isObject(params.input)){
-        return await executor.execute<any>(
-          params.code,
-          ...params.input,
-        );
-      }else{
-        return await executor.execute<any>(
-          params.code,
-          params.input,
-        );
+      if (lodash.isObject(params.input)) {
+        return await executor.execute<any>(params.code, ...params.input);
+      } else {
+        return await executor.execute<any>(params.code, params.input);
       }
-    }
+    },
   };
 
   static init() {

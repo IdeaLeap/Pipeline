@@ -7,5 +7,5 @@
 **Signature:**
 
 ```typescript
-static customFn: Record<string, (result: any, context: PipelineContext) => any>;
+static customFn: Record<string, (input: any, context: PipelineContext) => any>;
 ```
