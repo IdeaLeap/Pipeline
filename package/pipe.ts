@@ -314,12 +314,18 @@ export class Pipe<T, R> {
         (input: T) => this.handleExecution(input, context),
         this.options,
       ) as (input: T | T[]) => Promise<R | R[]>;
-      return await batchedFunction(input);
+      const batchedRes = await batchedFunction(input);
+      lodash.set(
+          context,
+          ["stepResults", this.options.id],
+          batchedRes,
+        );
+      return batchedRes;
     } else {
-      if (Array.isArray(input)) {
-        context.emitter.emit("err", "Batch mode is not enabled for this pipe.");
-        throw new Error("Batch mode is not enabled for this pipe.");
-      }
+      // if (Array.isArray(input)) {
+      //   context.emitter.emit("err", "Batch mode is not enabled for this pipe.");
+      //   throw new Error("Batch mode is not enabled for this pipe.");
+      // }
       return await this.handleExecution(input, context);
     }
   }
@@ -667,7 +673,7 @@ export class Pipeline {
     >,
     predefinedUses?: PipeRegistryType,
   ): Pipeline {
-    if (lodash.has(json, "pipes") || !Array.isArray(json.pipes)) {
+    if (!json.pipes || !Array.isArray(json.pipes)) {
       throw new Error("Invalid JSON configuration: 'pipes' must be an array");
     }
 
