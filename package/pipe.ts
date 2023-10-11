@@ -129,6 +129,7 @@ export interface PipeOptions<T, R> extends BatchOptions<T, R> {
    * or a string representing a single input value.
    */
   inputs?: Record<string, any> | string;
+  cloneDeep?: boolean;
 }
 
 /**
@@ -291,7 +292,9 @@ export class Pipe<T, R> {
    * @returns The result of the pipe's execution, which can be an array if batching is enabled.
    * @throws Will throw an error if an invalid ID is used or if batching mode isn't enabled for an array input.
    */
-  async execute(input: T | T[], context: PipelineContext): Promise<R | R[]> {
+  async execute(input_: T | T[], context_: PipelineContext): Promise<R | R[]> {
+    let input = input_;
+    let context = context_;
     if (
       this.options.id === "self_params" ||
       this.options.id === "index_input"
@@ -310,10 +313,18 @@ export class Pipe<T, R> {
       this.options.params || {},
     );
     if (this.options.batch) {
-      const batchedFunction = batchDecorator(
-        (input: T) => this.handleExecution(input, context),
-        this.options,
-      ) as (input: T | T[]) => Promise<R | R[]>;
+      let batchedFunction = undefined;
+      if(lodash.get(this.options, "cloneDeep", false)) {
+        batchedFunction = batchDecorator(
+          (input: T) => this.handleExecution(lodash.cloneDeep(input), lodash.cloneDeep(context)),
+          lodash.cloneDeep(this.options),
+        ) as (input: T | T[]) => Promise<R | R[]>;
+      }else{
+        batchedFunction = batchDecorator(
+          (input: T) => this.handleExecution(input, context),
+          this.options,
+        ) as (input: T | T[]) => Promise<R | R[]>;
+      }
       const batchedRes = await batchedFunction(input);
       lodash.set(
           context,
@@ -326,7 +337,10 @@ export class Pipe<T, R> {
       //   context.emitter.emit("err", "Batch mode is not enabled for this pipe.");
       //   throw new Error("Batch mode is not enabled for this pipe.");
       // }
-      return await this.handleExecution(input, context);
+      if(lodash.get(this.options, "cloneDeep", false)) {
+        return await this.handleExecution(lodash.cloneDeep(input) as T, lodash.cloneDeep(context));
+      }
+      return await this.handleExecution(input as T, context);
     }
   }
 
