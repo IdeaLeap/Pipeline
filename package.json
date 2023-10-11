@@ -1,6 +1,6 @@
 {
   "name": "@idealeap/pipeline",
-  "version": "1.1.6",
+  "version": "1.2.0",
   "description": "A lightweight, low-code Pipeline built with GPT-4.",
   "main": "package/index.js",
   "author": "GPT-4 && Marlene && IdeaLeap",
