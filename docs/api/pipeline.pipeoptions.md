@@ -20,6 +20,7 @@ export interface PipeOptions<T, R> extends BatchOptions<T, R>
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
 |  [batch?](./pipeline.pipeoptions.batch.md) |  | boolean | _(Optional)_ A flag indicating whether batching should be used. If <code>true</code>, the pipe will handle inputs in batches. |
+|  [cloneDeep?](./pipeline.pipeoptions.clonedeep.md) |  | boolean | _(Optional)_ |
 |  [description?](./pipeline.pipeoptions.description.md) |  | string | _(Optional)_ An optional description of the pipe. |
 |  [destroyProcess?](./pipeline.pipeoptions.destroyprocess.md) |  | () =&gt; void | _(Optional)_ An optional function to clean up resources when the pipe is destroyed. |
 |  [destroyProcessUse?](./pipeline.pipeoptions.destroyprocessuse.md) |  | string | _(Optional)_ The funcName of destroy processing. |

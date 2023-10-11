@@ -9,15 +9,15 @@ Executes the pipe's main functionality, handling batching if enabled, and managi
 **Signature:**
 
 ```typescript
-execute(input: T | T[], context: PipelineContext): Promise<R | R[]>;
+execute(input_: T | T[], context_: PipelineContext): Promise<R | R[]>;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  input | T \| T\[\] | The input to the pipe, which can be an array if batching is enabled. |
-|  context | [PipelineContext](./pipeline.pipelinecontext.md) | The current pipeline context. |
+|  input\_ | T \| T\[\] |  |
+|  context\_ | [PipelineContext](./pipeline.pipelinecontext.md) |  |
 
 **Returns:**
 

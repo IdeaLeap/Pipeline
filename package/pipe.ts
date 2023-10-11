@@ -314,31 +314,34 @@ export class Pipe<T, R> {
     );
     if (this.options.batch) {
       let batchedFunction = undefined;
-      if(lodash.get(this.options, "cloneDeep", false)) {
+      if (lodash.get(this.options, "cloneDeep", false)) {
         batchedFunction = batchDecorator(
-          (input: T) => this.handleExecution(lodash.cloneDeep(input), lodash.cloneDeep(context)),
+          (input: T) =>
+            this.handleExecution(
+              lodash.cloneDeep(input),
+              lodash.cloneDeep(context),
+            ),
           lodash.cloneDeep(this.options),
         ) as (input: T | T[]) => Promise<R | R[]>;
-      }else{
+      } else {
         batchedFunction = batchDecorator(
           (input: T) => this.handleExecution(input, context),
           this.options,
         ) as (input: T | T[]) => Promise<R | R[]>;
       }
       const batchedRes = await batchedFunction(input);
-      lodash.set(
-          context,
-          ["stepResults", this.options.id],
-          batchedRes,
-        );
+      lodash.set(context, ["stepResults", this.options.id], batchedRes);
       return batchedRes;
     } else {
       // if (Array.isArray(input)) {
       //   context.emitter.emit("err", "Batch mode is not enabled for this pipe.");
       //   throw new Error("Batch mode is not enabled for this pipe.");
       // }
-      if(lodash.get(this.options, "cloneDeep", false)) {
-        return await this.handleExecution(lodash.cloneDeep(input) as T, lodash.cloneDeep(context));
+      if (lodash.get(this.options, "cloneDeep", false)) {
+        return await this.handleExecution(
+          lodash.cloneDeep(input) as T,
+          lodash.cloneDeep(context),
+        );
       }
       return await this.handleExecution(input as T, context);
     }
